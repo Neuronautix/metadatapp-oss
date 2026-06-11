@@ -1,0 +1,27 @@
+parameters:
+    ai_assistant_enabled_default: false
+    # Supported providers: null, mock, curate_gpt, account
+    # Set to 'account' to use per-account LLM provider settings configured via /api/ai/provider-config.
+    ai_provider_default: 'null'
+    ai_default_model_default: 'assistant-preview.v1'
+    ai_enabled_tasks_default: 'assistant_status,assistant_chat,suggest_form_inputs,explain_missing_metadata,draft_query_filters,generate_export_content'
+    ai_sandbox_enabled_default: false
+    ai_human_approval_required_default: true
+    ai_write_actions_enabled_default: false
+    ai_mcp_bridge_enabled_default: false
+    ai_openai_api_key_default: ''
+    ai_openai_model_default: 'gpt-5'
+    ai_anthropic_api_key_default: ''
+    ai_anthropic_model_default: 'claude-opus-4-1-20250805'
+    ai.assistant_enabled: '%env(bool:default:ai_assistant_enabled_default:AI_ASSISTANT_ENABLED)%'
+    ai.provider: '%env(default:ai_provider_default:AI_MODEL_PROVIDER)%'
+    ai.default_model: '%env(default:ai_default_model_default:AI_DEFAULT_MODEL)%'
+    ai.enabled_tasks: '%env(csv:default:ai_enabled_tasks_default:AI_ENABLED_TASKS)%'
+    ai.sandbox_enabled: '%env(bool:default:ai_sandbox_enabled_default:AI_SANDBOX_ENABLED)%'
+    ai.human_approval_required: '%env(bool:default:ai_human_approval_required_default:AI_HUMAN_APPROVAL_REQUIRED)%'
+    ai.write_actions_enabled: '%env(bool:default:ai_write_actions_enabled_default:AI_WRITE_ACTIONS_ENABLED)%'
+    ai.mcp_bridge_enabled: '%env(bool:default:ai_mcp_bridge_enabled_default:AI_MCP_BRIDGE_ENABLED)%'
+    ai.openai_api_key: '%env(default:ai_openai_api_key_default:OPENAI_API_KEY)%'
+    ai.openai_model: '%env(default:ai_openai_model_default:OPENAI_MODEL)%'
+    ai.anthropic_api_key: '%env(default:ai_anthropic_api_key_default:ANTHROPIC_API_KEY)%'
+    ai.anthropic_model: '%env(default:ai_anthropic_model_default:ANTHROPIC_MODEL)%'

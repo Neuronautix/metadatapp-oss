@@ -1,0 +1,16 @@
+mcp:
+    app: metadatapp
+    description: "Metadatapp Lab Assistant MCP Server"
+    client_transports:
+        http: true
+    http:
+        path: /mcp
+        session:
+            store: file
+            directory: '%kernel.project_dir%/var/mcp-sessions'
+
+when@test:
+    mcp:
+        http:
+            session:
+                store: memory

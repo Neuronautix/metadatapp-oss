@@ -1,0 +1,72 @@
+name: "Deep Agents Code — bounded review"
+
+# Manual trigger only. This workflow runs dcode in read-only review mode:
+# it inspects code and reports findings but never commits, pushes, or creates branches.
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Review task for dcode (e.g. 'Review the API serialization groups for N+1 risks')"
+        required: true
+        type: string
+      model:
+        description: "Model override (leave empty to use dcode default)"
+        required: false
+        type: string
+        default: ""
+      max_turns:
+        description: "Maximum agent turns"
+        required: false
+        type: string
+        default: "10"
+      timeout_seconds:
+        description: "Wall-clock timeout in seconds"
+        required: false
+        type: string
+        default: "600"
+
+permissions:
+  contents: read
+
+jobs:
+  dcode-review:
+    name: "dcode bounded review"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: "Install uv"
+        run: |
+          curl -fsSL https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: "Install deepagents-code"
+        run: |
+          DEEPCODE_VERSION="0.1.6"
+          uv tool install "deepagents-code==${DEEPCODE_VERSION}"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: "Verify dcode installation"
+        run: dcode --version
+
+      - name: "Run dcode review (read-only, bounded)"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEEPAGENTS_MODEL: ${{ inputs.model }}
+        run: |
+          set -euo pipefail
+
+          MODEL_ARGS=()
+          if [[ -n "${DEEPAGENTS_MODEL:-}" ]]; then
+            MODEL_ARGS=(--model "${DEEPAGENTS_MODEL}")
+          fi
+
+          # Shell allow-list is intentionally narrow: read-only inspection tools only.
+          # No write operations (git commit, git push, castor, composer, pnpm) are allowed.
+          exec dcode \
+            "${MODEL_ARGS[@]}" \
+            --shell-allow-list "recommended,git" \
+            --max-turns "${{ inputs.max_turns }}" \
+            --timeout "${{ inputs.timeout_seconds }}" \
+            -n "${{ inputs.task }}"

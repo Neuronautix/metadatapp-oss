@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>PreclinicalTrials.eu</title>
+  <rect width="64" height="64" rx="12" fill="#0f766e"/>
+  <path d="M18 17h28v6H18zM18 29h28v6H18zM18 41h18v6H18z" fill="#ccfbf1"/>
+  <path d="M44 38a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm0 4v8m-4-4h8" stroke="#ffffff" stroke-width="3" stroke-linecap="round"/>
+</svg>

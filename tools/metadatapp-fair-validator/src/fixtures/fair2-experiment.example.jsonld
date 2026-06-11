@@ -1,0 +1,53 @@
+{
+  "@context": {
+    "schema": "https://schema.org/",
+    "bioschemas": "https://bioschemas.org/",
+    "obi": "http://purl.obolibrary.org/obo/OBI_",
+    "qudt": "http://qudt.org/schema/qudt/",
+    "unit": "http://qudt.org/vocab/unit/",
+    "ncbitaxon": "http://purl.obolibrary.org/obo/NCBITaxon_",
+    "mgi": "http://www.informatics.jax.org/marker/MGI:",
+    "pato": "http://purl.obolibrary.org/obo/PATO_",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dcterms": "http://purl.org/dc/terms/"
+  },
+  "@graph": [
+    {
+      "@id": "https://metadatapp.example/study/study-001",
+      "@type": "bioschemas:Study",
+      "schema:name": "Shank3 KO open-field behaviour",
+      "schema:creator": {
+        "@type": "schema:Person",
+        "@id": "https://orcid.org/0000-0002-1825-0097",
+        "schema:name": "A. Researcher"
+      },
+      "dcterms:license": "https://creativecommons.org/licenses/by/4.0/",
+      "dcterms:modified": "2026-04-30",
+      "prov:wasGeneratedBy": "https://metadatapp.example/activity/seeding-001"
+    },
+    {
+      "@id": "https://metadatapp.example/subject/m-001",
+      "@type": "bioschemas:BioSample",
+      "schema:name": "M001",
+      "schema:sameAs": "ncbitaxon:10090",
+      "bioschemas:taxonomicRange": "http://purl.obolibrary.org/obo/NCBITaxon_10090",
+      "bioschemas:genotype": "mgi:MGI:107889",
+      "schema:gender": "pato:PATO_0000384"
+    },
+    {
+      "@id": "https://metadatapp.example/measurement/weight-001",
+      "@type": "schema:QuantitativeValue",
+      "schema:value": 23.4,
+      "qudt:hasUnit": "unit:GM",
+      "schema:unitText": "g",
+      "schema:measurementTechnique": "manual",
+      "prov:wasDerivedFrom": "https://metadatapp.example/subject/m-001"
+    },
+    {
+      "@id": "https://metadatapp.example/procedure/surgery-001",
+      "@type": "obi:OBI_0000091",
+      "schema:name": "Stereotaxic injection of Diazepam",
+      "schema:agent": "https://orcid.org/0000-0002-1825-0097"
+    }
+  ]
+}

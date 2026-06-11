@@ -1,0 +1,35 @@
+=== ARRIVE 2.0 Checklist Helper Report ===
+{{ report.title }}
+This export follows ARRIVE 2.0 itemization (Essential 10 + Recommended Set).
+Source: ARRIVE guidelines 2.0 (Percie du Sert et al., PLOS Biology 2020).
+Generated: {{ generatedAt }} UTC
+
+--- Report Scope ---
+Investigation: {{ report.investigationName }}
+Study count: {{ report.studyCount }}
+Animal count: {{ report.animalCount }}
+
+--- ARRIVE Essential 10 ---
+{% for item in report.essentialItems %}
+[{{ item.id }}] {{ item.title }}
+Guidance: {{ item.guidance }}
+Evidence: {{ item.value }}
+
+{% endfor %}
+--- ARRIVE Recommended Set ---
+{% for item in report.recommendedItems %}
+[{{ item.id }}] {{ item.title }}
+Guidance: {{ item.guidance }}
+Evidence: {{ item.value }}
+
+{% endfor %}
+--- Missing Metadata Warnings ---
+{% if report.warnings is empty %}
+No missing ARRIVE checklist items detected from currently linked metadata.
+{% else %}
+{% for warning in report.warnings %}
+- {{ warning }}
+{% endfor %}
+{% endif %}
+
+--- End of Report ---

@@ -1,0 +1,291 @@
+{
+  "realm": "demo",
+  "displayName": "MMAPP DEMO",
+  "accessCodeLifespan": 1,
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "loginTheme": "api-platform-demo",
+  "roles": {
+    "realm": [
+      {
+        "name": "super_admin",
+        "description": "Super admin role (includes 'admin' and 'user' roles)",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "admin"
+          ]
+        },
+        "clientRole": false
+      },
+      {
+        "name": "admin",
+        "description": "Admin role (includes 'user' role)",
+        "composite": true,
+        "composites": {
+          "realm": [
+            "user"
+          ]
+        },
+        "clientRole": false
+      },
+      {
+        "id": "0a34f93f-a81a-4edd-b6a2-7ed3d06a392c",
+        "name": "user",
+        "description": "User role (default role on an authenticated user)",
+        "composite": false,
+        "clientRole": false
+      }
+    ],
+    "client": {
+      "api-platform-api": [
+        {
+          "name": "uma_protection",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "6832d039-5543-4e66-afc5-bc5057e8234d"
+        }
+      ],
+      "api-platform-swagger": []
+    }
+  },
+  "defaultRole": {
+    "id": "0a34f93f-a81a-4edd-b6a2-7ed3d06a392c",
+    "name": "user",
+    "description": "User role (default role on an authenticated user)",
+    "composite": false,
+    "clientRole": false
+  },
+  "users": [
+    {
+      "username": "doctor.yiolyo",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Doctor",
+      "lastName": "YioLyo",
+      "email": "doctor.yiolyo@mdta.net",
+      "attributes": {
+        "account_key": ["inst-corpogn"],
+        "account_name": ["Inst.@CorpOGN"],
+        "organization_role": ["admin"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "super_admin"
+      ]
+    },
+    {
+      "username": "njuke.oaye",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Njuke",
+      "lastName": "Oaye",
+      "email": "njuke.oaye@mdta.net",
+      "attributes": {
+        "account_key": ["inst-corpogn"],
+        "account_name": ["Inst.@CorpOGN"],
+        "organization_role": ["viewer"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    },
+    {
+      "username": "demo.omed",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "demo",
+      "lastName": "omed",
+      "email": "demo@metadatapp.net",
+      "attributes": {
+        "account_key": ["metadatapp-demo-lab"],
+        "account_name": ["Metadatapp Demo Lab"],
+        "organization_role": ["admin"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "super_admin"
+      ]
+    },
+    {
+      "username": "demo.admin",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "Admin",
+      "email": "demo.admin@metadatapp.net",
+      "attributes": {
+        "account_key": ["metadatapp-demo-lab"],
+        "account_name": ["Metadatapp Demo Lab"],
+        "organization_role": ["admin"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "admin"
+      ]
+    },
+    {
+      "username": "demo.user",
+      "enabled": true,
+      "emailVerified": true,
+      "firstName": "Demo",
+      "lastName": "User",
+      "email": "demo.user@metadatapp.net",
+      "attributes": {
+        "account_key": ["metadatapp-demo-lab"],
+        "account_name": ["Metadatapp Demo Lab"],
+        "organization_role": ["viewer"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pa55w0rd"
+        }
+      ],
+      "realmRoles": [
+        "user"
+      ]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "roles",
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
+    }
+  ],
+  "clients": [
+    {
+      "id": "6832d039-5543-4e66-afc5-bc5057e8234d",
+      "clientId": "api-platform-api",
+      "description": "Confidential client to check authorizations (RBAC)",
+      "name": "MAPP DEMO",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "metadatapp-local-dev-client-secret",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true,
+      "authorizationSettings": {
+        "allowRemoteResourceManagement": true,
+        "policyEnforcementMode": "ENFORCING",
+        "decisionStrategy": "UNANIMOUS",
+        "policies": [
+          {
+            "name": "Owner Policy",
+            "description": "Grants access only for users that own a resource (based on \"owner\" resource attribute)",
+            "type": "script-owner-policy.js",
+            "logic": "POSITIVE",
+            "decisionStrategy": "AFFIRMATIVE"
+          },
+          {
+            "name": "Review Owner Permission",
+            "description": "Ensure only users that own a review resource have access",
+            "type": "resource",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "urn:api-platform-api:resources:review",
+              "applyPolicies": "[\"Owner Policy\"]"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "clientId": "api-platform-swagger",
+      "name": "API MDTA Swagger UI",
+      "description": "Public client for Swagger UI",
+      "enabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "publicClient": true
+    },
+    {
+      "clientId": "osoma",
+      "name": "Osoma",
+      "description": "Public client for the Osoma frontend",
+      "enabled": true,
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "publicClient": true,
+      "protocolMappers": [
+        {
+          "name": "account_key",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "account_key",
+            "claim.name": "account_key",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "account_name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "account_name",
+            "claim.name": "account_name",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "organization_role",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "organization_role",
+            "claim.name": "organization_role",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ]
+}

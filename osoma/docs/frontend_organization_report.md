@@ -1,0 +1,165 @@
+# Osoma Frontend Organization and Data Display Report
+
+This document outlines the architectural organization of the Osoma application, specifically detailing the structural organization of features, the methods used to display complex data, the usage of tabs, and how features interconnect across the frontend.
+
+## 1. Top-Level Organization
+
+The application is architected around a feature-folder pattern, logically grouped into three main domains:
+
+* **Core (`features/core`)**: The fundamental entities of the scientific and operational workflow. 
+  * Features: `projects`, `experiments`, `subjects`, `samples`, `datasets`, `protocols`, `cages`, `animals`, `zebrafish`, `scenario`.
+* **Integrations (`features/integrations`)**: External system connectors, specialized applications, and advanced analytics.
+  * Features: `atmp`, `connected-apps`, `dvc`, `dvc-observatory`, `techniplast`, `nam-vcg`, `observatory`.
+* **System (`features/system`)**: Application configuration, global utilities, and authentication/routing boundaries.
+  * Features: `admin`, `audit`, `auth`, `dashboard`, `import`, `metadatapp`, `organizations`, `settings`, `users`, `search`, `calendar`, `timeline`, `data-entry`, `ops`.
+
+This structure directly informs the layout navigation (`Sidebar`, `Topbar`) and routing authorization tiers (`MetaGuard` vs `NonMetaGuard`).
+
+---
+
+## 2. Ways of Displaying Data
+
+The frontend relies heavily on a unified design system, surfacing data differently depending on intent:
+
+### 2.1 Tabular Data (`Table`, `DataGrid`)
+Tables are the primary vehicle for high-density index/list views.
+* **Core Entity Lists**: `ProjectsPage`, `ExperimentsPage`, `SamplesPage`, `SubjectsPage`, `UsersPage`, `OrganizationsPage`, and `CagesPage` all use `Table`s with custom headers (`TableHeader`) to display their aggregated collections.
+* **Component Usage**: `Table` components generally encompass metadata, status badges, and related linkages right on the row level. 
+* **Specialized Matrices**: e.g., `EndpointMatrix` (in ATMP) and `CageSubjectsTable` showing focused relations within a component context.
+
+### 2.2 Dashboarding & Metrics (`Card`, `StatCard`)
+Cards provide glanceable context, grouping related statistics visually.
+* **Top-level Stats**: Used heavily across `ExperimentsPage` and `ProjectsPage` to provide summary rollups (e.g., *Running now*, *QC attention*, *Data volume*).
+* **The Observatory & Analytics hubs**: The `DVC` and `Observatory` integrations use Cards to build composite dashboards (`InsightCards`, `BehavioralOutputsPanel`, `WelfarePanel`, `ControlTower`).
+* **Interactive Dashboard Widgets**: The main platform Dashboard relies on Cards for its `OngoingProjects` and `ActiveExperiments` feeds.
+
+### 2.3 Visual Spanning (`HorizontalTimeline`)
+* **Time-Series Relationships**: Specifically used in `AssayTimeline`, mapping `TimelineEvent` records visually (scheduled, created, linked, status updates) with corresponding icons and colors for quick process comprehension.
+
+---
+
+## 3. Usage of Tabs
+
+Tabs (`SegmentedTabs`, `DetailTabs`) act as the primary structural spine for **Detail Pages**. When a user clicks deeply into an entity, tabs partition complex sub-resources to avoid infinite scrolling.
+
+* **Standard Detail Pattern**: 
+  Almost all view pages (`UserViewPage`, `OrganizationViewPage`, `SampleViewPage`, `ExperimentViewPage`, `DatasetViewPage`, `ProtocolViewPage`, `SubjectViewPage`) implement a `DetailTabs` component.
+* **Common Tab Shapes**:
+  1. **Overview**: Key-Value metadata and core entity state.
+  2. **Audit/Log**: The `ResourceAuditPanel` tracking the change history of that specific ID.
+  3. **Relations**: Contextual lists (e.g., Animals linked to a Project, Samples generated in an Experiment).
+* **Deep Context Overrides**: Hardware/Integration detail pages (e.g., `CageDetailPage`, `RoomDetailPage`) manually configure large arrays of custom tabs for maps, alarms, conditions, and specialized sensors.
+
+---
+
+## 4. How Features are Linked
+
+Data models and navigational views are tightly interconnected to facilitate a continuous workflow loop.
+
+### Declarative Routing (`router.tsx`)
+* The entire application is scaffolded by `react-router-dom`. URL parameters dictate context (`/projects/:projectId/animals/:animalId`).
+* Guards (`MetaGuard`, `NonMetaGuard`) partition the links. If the corresponding feature flag is missing, the system silently redirects the user or renders an "access disabled" card.
+
+### Entity Drill-downs
+* Every **Table Row** generally serves as a gateway to interconnected data. In the `ProjectsPage` table, clicking a Project routes to `ProjectViewPage`.
+* From within the `ProjectViewPage` tabs, a user can navigate seamlessly into related `Animals` (`AnimalDetailPage`), which then links to the `Subject`, which in turn surfaces the mapped `Timeline`.
+
+### Cross-Domain Linkages
+* **Timeline Events**: Events link entities intrinsically. An event on the `AssayTimeline` might record that "Sample X was generated by Protocol Y in Experiment Z", forging conceptual links.
+* **Observatory Connectors**: The `techniplast` facility maps and `dvc` hardware pipelines intersect physically. You can drill down from a theoretical `Experiment` directly into the hardware reading (`RoomDetailPage` or `SensorDetailPage`) tracking its environment.
+
+---
+
+## 5. Connected Applications
+
+The `connected-apps` feature provides a centralized hub for managing external integrations and data synchronization services (such as Elabftw or Tecniplast machinery).
+
+### What They Show:
+* **Integration Hub (`ConnectedAppsPage`)**: 
+  * Displays a grid of available external applications.
+  * Shows the **Integration Status** (Active/Inactive) and **Last Sync** timestamp.
+  * When deep-dive features are enabled, it provides an at-a-glance statistical summary right on the card:
+    * **Tracked Animals**: Total colony size imported (e.g., from private integration).
+    * **Active Cages**: Currently mapped hardware cages (e.g., to Tecniplast rooms).
+    * **Experiments**: Actively linked lab notebooks (e.g., from Elabftw).
+    * **Datasets**: Published and synchronized FAIR repositories.
+* **App Detail View (`ConnectedAppDetailPage`)**:
+  * **Deep Dive Data Metrics**: Visualizes key metrics specific to the integration, including a gauge for localized FAIR compliance scores.
+  * **Synchronization Controls**: Allows users to manually queue or trigger background synchronization tasks with the external service.
+  * **Configuration & Security**: Displays connection details, authorization methods (OAuth2, API Keys), and allows administrators to securely update authentication tokens.
+  * **Hardware-Specific Extensions**: Depending on the specific integration code (e.g., `tecniplast`), the detail page dynamically embeds contextual, specialized components (like `DVCIntegrationTasks`) directly into the integration view for deeper operational control.
+
+---
+
+## 6. Feature Flags & Role-Based Access Control (RBAC)
+
+The application relies heavily on dynamic feature toggling to serve different audiences (e.g., meta-data managers vs. wet-lab operators) from the same codebase.
+
+### 6.1 Feature Toggling
+* **`useFeatureFlag` Hook**: Used extensively inside components to conditionally render UI primitives.
+* **`Feature` Wrapper**: A declarative React component (`<Feature flag="feature.name" fallback={<FallbackUI />}>`) that wraps elements requiring specific flags. 
+* **Presets (`FeatureFlagProvider`)**: Accessible via a dropdown in the `Topbar`, allowing developers or demonstration users to easily switch between contextual personas (e.g., full "metadatapp" mode vs "non-metadatapp" operations mode).
+
+### 6.2 Structural Route Guarding
+* The `router.tsx` utilizes `MetaGuard` and `NonMetaGuard` layout components. These wrappers verify the root feature flags before rendering their `<Outlet />`. If a user navigates to a protected route without the flag, they are gracefully redirected or shown an access error.
+
+### 6.3 Local RBAC Mocking
+* The `RoleContext` provides a simulated role-switching mechanism (e.g., Admin, User, Viewer) available in non-production environments to test UI permutations without logging in and out.
+
+---
+
+## 7. State Management & Data Fetching
+
+State management is purposely decoupled from complex Redux-style stores, relying instead on network-first server state synchronization.
+
+### 7.1 `@tanstack/react-query`
+* **Query Caching**: All GET requests are managed via `useQuery`. Query keys are structured hierarchically (e.g., `['projects', filters]`), allowing precise cache invalidation.
+* **Mutations & Re-fetching**: Write operations (`useMutation`) automatically trigger `queryClient.invalidateQueries()`, ensuring the UI perfectly reflects the backend changes without manual state synchronization.
+
+### 7.2 API Modules
+* Each feature bucket maintains its own isolated `*.api.ts` file (e.g., `project.api.ts`, `connected-apps.api.ts`).
+* These modules export typed functions that encapsulate the underlying `axios` client calls, ensuring components remain unaware of bare HTTP requests.
+
+---
+
+## 8. Data Entry & Validation Patterns
+
+Creating and editing robust scientific data requires structured, type-safe input pipelines.
+
+### 8.1 Schema Validation
+* **`zod`**: Used to declare the expected schema for incoming forms or data grids. This provides both runtime validation and static TypeScript inference.
+
+### 8.2 Form State (`react-hook-form`)
+* Edit and creation pages (e.g., `SubjectEditPage`, `SampleEditPage`, `AtmpStudyFormPage`) utilize `react-hook-form` connected to the Zod resolvers. This ensures high-performance, controlled inputs with immediate feedback for complex nested data structures.
+
+### 8.3 Global Searching & Filtering
+* **`SearchBar`**: A global utility in the `Topbar` allows overarching entity queries.
+* **Table Filters**: Page-level filters (like Status and Project filters on `ExperimentsPage`) are mapped into React state, which structurally feed into the `useQuery` dependencies, driving real-time API pagination and sorting.
+
+---
+
+## 9. Advanced Analytics & DVC Visualizations
+
+The `integrations` domain houses highly specialized, chart-heavy components that diverge from the standard CRUD layouts, demanding high computational performance.
+
+### 9.1 The Observatory (`observatory`, `dvc-observatory`)
+* Features dense composite dashboards (`ControlTower`, `WelfarePanel`) analyzing multi-dimensional environmental and subject data. 
+
+### 9.2 Recharts Integration
+* Components like `CircadianMeanCompareChart` and `ActivityExplorerPage` utilize `recharts` to render time-series line charts, area charts, and categorical bar charts (e.g., Group Building phase analysis).
+
+### 9.3 Web Workers (`dvcDataWorker.js`)
+* To prevent UI thread blocking while crunching hundreds of thousands of CSV rows for DVC Activity plotting, the frontend offloads heavy parsing, binning, and normalization algorithms to a stateful Web Worker architecture.
+
+---
+
+## 10. Mocking & Development Mode (MSW)
+
+The `osoma` frontend can run entirely independent of a live PHP backend, facilitating rapid UI iteration and offline demonstrations.
+
+### 10.1 Mock Service Worker (MSW)
+* Located in `src/mocks`, MSW intercepts outbound XHR/Fetch requests at the network level.
+* **Handlers**: Each domain provides a `handlers.ts` file (e.g., `zebrafishHandlers`, `dvcIntegration` handlers) which returns constructed JSON payloads mimicking the actual API contracts.
+
+### 10.2 Seed Data
+* The `mocks/data/` or internal handler factories define rich relational seed data, allowing the frontend to populate its charts, tables, and timelines immediately upon mounting in development environments.

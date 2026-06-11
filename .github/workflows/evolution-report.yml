@@ -1,0 +1,287 @@
+name: "Create evolution report on PR merge"
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+  models: read
+
+jobs:
+  evolution-report:
+    name: "Create evolution report"
+    # Skip if the PR was not merged, or if it originated from an evolution-report
+    # automation branch (prevents the documentation commit from triggering itself).
+    if: >
+      github.event.pull_request.merged == true &&
+      !startsWith(github.event.pull_request.head.ref, 'evolution-report/')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Generate evolution report"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_MERGED_BY: ${{ github.event.pull_request.merged_by.login }}
+          PR_MERGE_COMMIT: ${{ github.event.pull_request.merge_commit_sha }}
+          MERGE_DATE: ${{ github.event.pull_request.merged_at }}
+        run: |
+          set -euo pipefail
+
+          DATE=$(echo "$MERGE_DATE" | cut -c1-10)
+          SLUG=$(echo "$PR_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//' | sed 's/-$//' | cut -c1-60)
+          FILENAME="doc/evolution/${DATE}-pr-${PR_NUMBER}-${SLUG}.md"
+          echo "REPORT_FILE=$FILENAME" >> "$GITHUB_ENV"
+
+          if [ -f "$FILENAME" ]; then
+            echo "Evolution report already exists: $FILENAME"
+            echo "REPORT_EXISTS=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          echo "REPORT_EXISTS=false" >> "$GITHUB_ENV"
+
+          # Export for use within this step (GITHUB_ENV only applies to subsequent steps)
+          export REPORT_FILE="$FILENAME"
+
+          # Fetch PR diff (truncated to 12 KB to stay within model context)
+          # Fetch to a temp file first to avoid SIGPIPE from piping into `head`
+          if ! gh pr diff "$PR_NUMBER" > /tmp/pr_diff_full.txt; then
+            echo "Failed to fetch diff for PR #$PR_NUMBER; aborting evolution report generation." >&2
+            exit 1
+          fi
+          head -c 12000 /tmp/pr_diff_full.txt > /tmp/pr_diff.txt
+
+          python3 << PYEOF
+          import os, json, requests
+
+          token = os.environ['GITHUB_TOKEN']
+          date  = os.environ['MERGE_DATE'][:10]
+
+          with open('/tmp/pr_diff.txt') as f:
+              diff = f.read()
+          with open('doc/templates/merge-evolution-report.md') as f:
+              template = f.read()
+
+          prompt = f"""Write a substantive evolution report for a merged pull request.
+
+          PR metadata:
+          - Number: #{os.environ['PR_NUMBER']}
+          - Title: {os.environ['PR_TITLE']}
+          - Branch: {os.environ['PR_BRANCH']}
+          - Author: {os.environ['PR_AUTHOR']}
+          - Merged by: {os.environ['PR_MERGED_BY']}
+          - Merge commit: {os.environ['PR_MERGE_COMMIT']}
+          - Date: {date}
+          - PR body:
+          {os.environ.get('PR_BODY', '(none)')}
+
+          PR diff (may be truncated at 12 KB):
+          {diff}
+
+          Template to follow:
+          {template}
+
+          Rules:
+          - Fill every section with concrete content derived from the diff and PR metadata.
+          - Name specific files changed, classes introduced, or behaviors modified.
+          - If a section genuinely does not apply (e.g. no user-facing benefit for a CI chore), say so explicitly — do not write TBD.
+          - Do not invent information not present in the diff or PR body.
+          - Output only the markdown report content, no preamble.
+          """
+
+          resp = requests.post(
+              'https://models.inference.ai.azure.com/chat/completions',
+              headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+              json={
+                  'model': 'gpt-4o',
+                  'messages': [{'role': 'user', 'content': prompt}],
+                  'max_tokens': 4000,
+              },
+              timeout=120,
+          )
+          resp.raise_for_status()
+
+          content = resp.json()['choices'][0]['message']['content']
+
+          filename = os.environ['REPORT_FILE']
+          with open(filename, 'w') as f:
+              f.write(content)
+
+          print(f"Report written: {filename} ({len(content)} chars)")
+          PYEOF
+
+      - name: "Update INDEX.md"
+        if: env.REPORT_EXISTS == 'false'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          BASENAME=$(basename "$REPORT_FILE")
+          echo "- [${BASENAME}](${BASENAME})" >> doc/evolution/INDEX.md
+
+      - name: "Ingest report into wiki"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 << 'PYEOF'
+          import os, json, requests, pathlib
+
+          token = os.environ['GITHUB_TOKEN']
+          report_path = os.environ['REPORT_FILE']
+          repo_root = pathlib.Path.cwd().resolve()
+          wiki_root = (repo_root / 'doc/wiki').resolve()
+
+          # Cap file content to keep total payload within the GitHub Models request size limit.
+          def read(path, max_chars=None):
+              try:
+                  text = pathlib.Path(path).read_text()
+                  if max_chars and len(text) > max_chars:
+                      return text[:max_chars] + '\n...[truncated]\n'
+                  return text
+              except FileNotFoundError:
+                  return ''
+
+          def read_pages(pattern, per_file_max=1000):
+              return {
+                  str(p): read(str(p), per_file_max)
+                  for p in sorted(pathlib.Path('doc/wiki').glob(pattern))
+              }
+
+          report_content = read(report_path)
+
+          schema   = read('doc/wiki/SCHEMA.md', 4000)
+          index    = read('doc/wiki/INDEX.md', 800)
+          overview = read('doc/wiki/overview.md', 2000)
+          debt     = read('doc/wiki/tech-debt.md', 2000)
+          feature_pages  = read_pages('features/*.md')
+          decision_pages = read_pages('decisions/*.md')
+          area_pages     = read_pages('areas/*.md')
+
+          prompt = f"""You are maintaining a project knowledge wiki. Ingest the following evolution report and return updated wiki file contents as JSON.
+
+          SCHEMA (follow exactly):
+          {schema}
+
+          CURRENT WIKI STATE:
+          INDEX.md: {index}
+          overview.md: {overview}
+          tech-debt.md: {debt}
+          Feature pages: {json.dumps(feature_pages)}
+          Decision pages: {json.dumps(decision_pages)}
+          Area pages: {json.dumps(area_pages)}
+
+          REPORT TO INGEST ({report_path}):
+          {report_content}
+
+          Return a JSON object:
+          {{
+            "files": {{
+              "doc/wiki/features/example.md": "<full updated content>",
+              "doc/wiki/LOG.md": "<full updated content>"
+            }},
+            "skipped": false
+          }}
+
+          Rules:
+          - Only include files that actually need changes.
+          - Always update LOG.md: prepend a new entry following the format in SCHEMA.md.
+          - Update INDEX.md only if new wiki pages are created.
+          - Preserve all existing content in files you update; only add or modify what the report justifies.
+          - Be concrete — only write content supported by the report.
+          """
+
+          resp = requests.post(
+              'https://models.inference.ai.azure.com/chat/completions',
+              headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'},
+              json={
+                  'model': 'gpt-4o',
+                  'messages': [{'role': 'user', 'content': prompt}],
+                  'max_tokens': 6000,
+                  'response_format': {'type': 'json_object'},
+              },
+              timeout=180,
+          )
+          resp.raise_for_status()
+
+          result = json.loads(resp.json()['choices'][0]['message']['content'])
+
+          if result.get('skipped'):
+              print("Wiki ingest skipped: report had no actionable content.")
+          else:
+              files = result.get('files', {})
+              if not isinstance(files, dict):
+                  raise ValueError('Model response must contain a "files" object.')
+
+              def safe_wiki_path(file_path):
+                  p = pathlib.Path(file_path)
+                  if p.is_absolute():
+                      raise ValueError(f"Absolute path is not allowed: {file_path}")
+
+                  normalized = p.as_posix()
+                  if not normalized.startswith('doc/wiki/'):
+                      raise ValueError(f"Only doc/wiki/ files can be updated: {file_path}")
+
+                  resolved = (repo_root / p).resolve()
+                  if wiki_root not in resolved.parents and resolved != wiki_root:
+                      raise ValueError(f"Path escapes doc/wiki/: {file_path}")
+
+                  return resolved
+
+              for file_path, content in files.items():
+                  if not isinstance(content, str):
+                      raise ValueError(f"File content must be a string for {file_path}")
+                  p = safe_wiki_path(file_path)
+                  p.parent.mkdir(parents=True, exist_ok=True)
+                  p.write_text(content)
+                  print(f"Updated: {p.as_posix()}")
+          PYEOF
+
+      - name: "Create evolution report branch and pull request"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add "$REPORT_FILE" doc/evolution/INDEX.md doc/wiki/
+          if git diff --cached --quiet; then
+            echo "No evolution/wiki changes detected; nothing to commit."
+            exit 0
+          fi
+
+          BRANCH="evolution-report/pr-${PR_NUMBER}-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git commit -m "doc: add evolution report for PR #${PR_NUMBER}"
+          git push origin "$BRANCH"
+
+          PR_URL="https://github.com/${{ github.repository }}/pull/new/${BRANCH}"
+
+          if gh pr create \
+            --title "doc: add evolution report for PR #${PR_NUMBER}" \
+            --body "Automated evolution report and wiki ingestion for merged PR #${PR_NUMBER}." \
+            --base main \
+            --head "$BRANCH"; then
+            echo "Evolution report PR created."
+          else
+            echo "::warning::GitHub Actions could not create the PR automatically. Open it manually: ${PR_URL}"
+            echo "Evolution report branch pushed: ${BRANCH}"
+            echo "Manual PR URL: ${PR_URL}"
+          fi

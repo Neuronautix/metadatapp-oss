@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/Neuronautix/metadatapp-oss/security/advisories/new
+    about: Please report security issues privately, never as a public issue. See SECURITY.md.
+  - name: 💬 Questions & support
+    url: https://github.com/Neuronautix/metadatapp-oss/blob/main/SUPPORT.md
+    about: For setup help and general questions, see SUPPORT.md before opening an issue.

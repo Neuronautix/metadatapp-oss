@@ -1,0 +1,21 @@
+{
+    auto_https off
+    frankenphp
+}
+
+{$SERVER_NAME:localhost}, :80 {
+    root * /app/public
+
+    encode zstd br gzip
+
+    mercure {
+        transport_url {$MERCURE_TRANSPORT_URL:bolt:///data/mercure.db}
+        publisher_jwt {$MERCURE_PUBLISHER_JWT_KEY} {$MERCURE_PUBLISHER_JWT_ALG:HS256}
+        subscriber_jwt {$MERCURE_SUBSCRIBER_JWT_KEY:-{$MERCURE_PUBLISHER_JWT_KEY}} {$MERCURE_SUBSCRIBER_JWT_ALG:HS256}
+        anonymous
+        subscriptions
+        {$MERCURE_EXTRA_DIRECTIVES}
+    }
+
+    php_server
+}

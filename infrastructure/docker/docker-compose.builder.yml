@@ -1,0 +1,28 @@
+volumes:
+    builder-data: {}
+
+services:
+    builder:
+        build:
+            context: services/php
+            target: builder
+            args:
+                USER_ID: ${USER_ID}
+        init: true
+        depends_on:
+            - database
+        environment:
+            - MERCURE_URL=http://frontend/.well-known/mercure
+            - MERCURE_PUBLISHER_JWT_KEY=metadatapp-local-mercure-key
+            - MERCURE_SUBSCRIBER_JWT_KEY=metadatapp-local-mercure-key
+            - MERCURE_PUBLIC_URL=https://${PROJECT_ROOT_DOMAIN}/.well-known/mercure
+            - PHP_CS_FIXER_IGNORE_ENV=1
+            - COMPOSER_MEMORY_LIMIT=-1
+            - GITHUB_ACTIONS
+            - UID=${USER_ID}
+        volumes:
+            - "builder-data:/home/app"
+            - "${COMPOSER_CACHE_DIR}:/home/app/.composer/cache"
+            - "${PROJECT_HOST_ROOT:-../..}:/var/www:cached"
+        profiles:
+            - default

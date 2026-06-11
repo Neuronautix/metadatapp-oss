@@ -1,0 +1,309 @@
+name: "Wiki lint and quality check"
+
+on:
+  schedule:
+    # Runs every Monday at 07:00 UTC
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  models: read
+  pull-requests: write
+
+jobs:
+  wiki-lint:
+    name: "Lint wiki quality"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Run wiki lint"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 << 'PYEOF'
+          import os
+          import re
+          import json
+          import pathlib
+          import datetime
+
+          repo_root = pathlib.Path.cwd().resolve()
+          wiki_root = (repo_root / 'doc/wiki').resolve()
+          evolution_root = (repo_root / 'doc/evolution').resolve()
+
+          today = datetime.date.today()
+          today_iso = today.isoformat()
+
+          REQUIRED_FRONTMATTER_KEYS = {"title", "updated"}
+          FRONTMATTER_EXEMPT = {
+              "doc/wiki/SCHEMA.md",
+              "doc/wiki/INDEX.md",
+              "doc/wiki/LOG.md",
+          }
+
+          BOILERPLATE_PATTERNS = [
+              "Delivers the capability described in the PR title",
+              "capability described in the PR title",
+              "TODO",
+              "TBD",
+          ]
+
+          def rel(path: pathlib.Path) -> str:
+              return str(path.relative_to(repo_root)).replace("\\", "/")
+
+          def read_text(path: pathlib.Path) -> str:
+              try:
+                  return path.read_text(encoding="utf-8")
+              except UnicodeDecodeError:
+                  return path.read_text(errors="ignore")
+
+          def list_wiki_pages():
+              if not wiki_root.exists():
+                  return []
+              return sorted(wiki_root.rglob("*.md"))
+
+          def list_evolution_reports():
+              if not evolution_root.exists():
+                  return []
+              return sorted(evolution_root.rglob("*.md"))
+
+          def parse_frontmatter(text: str):
+              if not text.startswith("---\n"):
+                  return None
+
+              end = text.find("\n---", 4)
+              if end == -1:
+                  return None
+
+              raw = text[4:end].strip()
+              data = {}
+
+              for line in raw.splitlines():
+                  if ":" not in line:
+                      continue
+                  key, value = line.split(":", 1)
+                  data[key.strip()] = value.strip().strip('"').strip("'")
+
+              return data
+
+          def parse_date(value: str):
+              if not value:
+                  return None
+
+              value = value.strip().strip('"').strip("'")
+              match = re.search(r"\d{4}-\d{2}-\d{2}", value)
+              if not match:
+                  return None
+
+              try:
+                  return datetime.date.fromisoformat(match.group(0))
+              except ValueError:
+                  return None
+
+          def extract_source_prs(text: str):
+              frontmatter = parse_frontmatter(text)
+              if not frontmatter:
+                  return set()
+
+              source_raw = frontmatter.get("source_prs", "")
+              if not source_raw:
+                  return set()
+
+              # Accept formats such as:
+              # source_prs: [123, 124]
+              # source_prs: ["doc/evolution/report.md"]
+              # source_prs: doc/evolution/foo.md
+              return set(re.findall(r"(?:doc/evolution/)?[A-Za-z0-9._/\-]+\.md|#?\d+", source_raw))
+
+          wiki_pages = list_wiki_pages()
+          wiki_rels = [rel(p) for p in wiki_pages]
+
+          index_path = wiki_root / "INDEX.md"
+          log_path = wiki_root / "LOG.md"
+
+          index_text = read_text(index_path) if index_path.exists() else ""
+          log_text = read_text(log_path) if log_path.exists() else ""
+
+          issues = []
+
+          # 1. Orphan pages: wiki pages not referenced in INDEX.md
+          for page in wiki_pages:
+              page_rel = rel(page)
+              if page_rel in {"doc/wiki/INDEX.md", "doc/wiki/LOG.md", "doc/wiki/SCHEMA.md"}:
+                  continue
+
+              page_name = page.name
+              index_mentions_page = page_rel in index_text or page_name in index_text
+
+              if not index_mentions_page:
+                  issues.append({
+                      "type": "orphan",
+                      "file": page_rel,
+                      "detail": "Page is not referenced in doc/wiki/INDEX.md."
+                  })
+
+          # 2-4. Frontmatter, stale pages, boilerplate
+          referenced_sources = set()
+
+          for page in wiki_pages:
+              page_rel = rel(page)
+              text = read_text(page)
+
+              frontmatter = parse_frontmatter(text)
+
+              if page_rel not in FRONTMATTER_EXEMPT:
+                  if not frontmatter:
+                      issues.append({
+                          "type": "missing-frontmatter",
+                          "file": page_rel,
+                          "detail": "Page has no YAML frontmatter."
+                      })
+                  else:
+                      missing = sorted(k for k in REQUIRED_FRONTMATTER_KEYS if not frontmatter.get(k))
+                      if missing:
+                          issues.append({
+                              "type": "missing-frontmatter",
+                              "file": page_rel,
+                              "detail": f"Missing required frontmatter key(s): {', '.join(missing)}."
+                          })
+
+                      updated = parse_date(frontmatter.get("updated", ""))
+                      if updated:
+                          age_days = (today - updated).days
+                          if age_days > 60:
+                              issues.append({
+                                  "type": "stale",
+                                  "file": page_rel,
+                                  "detail": f"Frontmatter updated date is {updated.isoformat()}, {age_days} days old."
+                              })
+                      elif "updated" in frontmatter:
+                          issues.append({
+                              "type": "missing-frontmatter",
+                              "file": page_rel,
+                              "detail": "Frontmatter has an invalid updated date."
+                          })
+
+                  referenced_sources.update(extract_source_prs(text))
+
+              for pattern in BOILERPLATE_PATTERNS:
+                  if pattern in text:
+                      issues.append({
+                          "type": "boilerplate",
+                          "file": page_rel,
+                          "detail": f"Contains boilerplate or placeholder text: {pattern!r}."
+                      })
+                      break
+
+          # 5. Coverage drift: evolution reports not referenced in any wiki page
+          evolution_reports = list_evolution_reports()
+
+          for report in evolution_reports:
+              report_rel = rel(report)
+              report_name = report.name
+              report_stem = report.stem
+
+              is_referenced = (
+                  report_rel in referenced_sources
+                  or report_name in referenced_sources
+                  or report_stem in referenced_sources
+                  or report_rel in index_text
+              )
+
+              if not is_referenced:
+                  issues.append({
+                      "type": "coverage-drift",
+                      "file": report_rel,
+                      "detail": "Evolution report is not referenced by wiki source_prs frontmatter or INDEX.md."
+                  })
+
+          issue_count = len(issues)
+
+          if issue_count == 0:
+              notes = "No issues found."
+          else:
+              counts = {}
+              for issue in issues:
+                  counts[issue["type"]] = counts.get(issue["type"], 0) + 1
+              notes = "; ".join(f"{k}: {v}" for k, v in sorted(counts.items()))
+
+          log_entry = (
+              f"## [{today_iso}] lint | wiki quality check\n\n"
+              f"- Operation: lint\n"
+              f"- Source: scheduled\n"
+              f"- Pages touched: INDEX.md, LOG.md\n"
+              f"- Issues found: {issue_count}\n"
+              f"- Notes: {notes}\n\n"
+          )
+
+          updated_log = log_entry + log_text.lstrip()
+
+          if log_path.exists():
+              log_path.write_text(updated_log, encoding="utf-8")
+              print("LOG.md updated.")
+          else:
+              log_path.parent.mkdir(parents=True, exist_ok=True)
+              log_path.write_text(updated_log, encoding="utf-8")
+              print("LOG.md created.")
+
+          report_path = wiki_root / "lint-report.json"
+          report_path.write_text(
+              json.dumps({
+                  "date": today_iso,
+                  "issues": issues,
+                  "issue_count": issue_count,
+                  "notes": notes,
+              }, indent=2),
+              encoding="utf-8"
+          )
+
+          print(f"Wiki lint found {issue_count} issue(s).")
+          for issue in issues:
+              print(f"  [{issue.get('type', 'unknown')}] {issue.get('file', '')} — {issue.get('detail', '')}")
+
+          with open(os.environ["GITHUB_ENV"], "a", encoding="utf-8") as f:
+              f.write(f"LINT_ISSUE_COUNT={issue_count}\n")
+          PYEOF
+
+      - name: "Create lint update branch and pull request"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add doc/wiki/LOG.md
+          if git diff --cached --quiet; then
+            echo "No LOG.md changes; nothing to commit."
+            exit 0
+          fi
+
+          BRANCH="automation/wiki-lint-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git commit -m "doc(wiki): weekly lint run — ${LINT_ISSUE_COUNT} issue(s) found"
+          git push origin "$BRANCH"
+
+          PR_URL="https://github.com/${{ github.repository }}/pull/new/${BRANCH}"
+
+          if gh pr create \
+            --title "doc(wiki): weekly lint run — ${LINT_ISSUE_COUNT} issue(s) found" \
+            --body "Automated weekly wiki lint run.
+
+          Issues found: ${LINT_ISSUE_COUNT}
+
+          This PR updates doc/wiki/LOG.md." \
+            --base main \
+            --head "$BRANCH"; then
+            echo "Wiki lint PR created."
+          else
+            echo "::warning::GitHub Actions could not create the PR automatically. Open it manually: ${PR_URL}"
+            echo "Wiki lint update branch pushed: ${BRANCH}"
+            echo "Manual PR URL: ${PR_URL}"
+          fi

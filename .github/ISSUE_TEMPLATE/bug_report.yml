@@ -1,0 +1,56 @@
+name: Bug Report
+description: File a bug to help us improve Metadatapp.
+labels: [ "bug", "triage" ]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: "A clear and concise description of what the bug is."
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Target Environment
+      description: "Which part of the application is affected?"
+      options:
+        - "API (Backend PHP)"
+        - "Osoma UI (React Dashboard)"
+        - "Infrastructure / Docker"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: "Please explain the exact steps to reproduce the behavior."
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: "What did you expect to happen?"
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser & OS
+      description: "For UI bugs, please specify your browser (e.g. Chrome 120) and OS (e.g. macOS Sonoma)."
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Screenshots or Logs
+      description: "If applicable, add screenshots or paste the error logs here."
+      render: shell
+    validations:
+      required: false

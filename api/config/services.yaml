@@ -1,0 +1,263 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    llm_curation_provider_default: 'mock'
+    llm_curation_mock_mode_default: 'normal'
+    llm_curation_provider: '%env(default:llm_curation_provider_default:LLM_CURATION_PROVIDER)%'
+    llm_curation_mock_mode: '%env(default:llm_curation_mock_mode_default:LLM_CURATION_MOCK_MODE)%'
+    sensor_agent_base_url_default: ''
+    sensor_agent_token_default: ''
+    sensor_agent_timeout_default: '5'
+    sensor_agent_enabled_default: 'false'
+    sensor_agent_base_url: '%env(default:sensor_agent_base_url_default:SENSOR_AGENT_BASE_URL)%'
+    sensor_agent_token: '%env(default:sensor_agent_token_default:SENSOR_AGENT_TOKEN)%'
+    sensor_agent_timeout: '%env(float:default:sensor_agent_timeout_default:SENSOR_AGENT_TIMEOUT)%'
+    sensor_agent_enabled: '%env(bool:default:sensor_agent_enabled_default:SENSOR_AGENT_ENABLED)%'
+    # Safe-by-default for public/OSS deployments: when the env var is unset, hide the
+    # connected-app proxy endpoints from the public OpenAPI docs (/api/docs).
+    openapi_hide_connected_apps_default: 'true'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/OpenApi/'
+
+    App\OpenApi\DvcOpenApiFactory:
+        arguments:
+            $decorated: '@App\OpenApi\DvcOpenApiFactory.inner'
+            $projectDir: '%kernel.project_dir%'
+            $hideConnectedAppsFromDocs: '%env(bool:default:openapi_hide_connected_apps_default:OPENAPI_HIDE_CONNECTED_APPS)%'
+        autoconfigure: false
+        decorates: 'api_platform.openapi.factory'
+        decoration_priority: 10
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    App\ConnectedApps\Apps\Elabftw\Client\ElabftwHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\Elabftw\Client\ElabftwHttpClient'
+
+    App\ConnectedApps\Apps\Elabftw\Client\ElabftwHttpClient:
+        arguments:
+            $httpClient: '@elabftw.client'
+
+    App\CurateGpt\Client\CurateGptClientInterface:
+        alias: 'App\CurateGpt\Client\CurateGptHttpClient'
+
+    App\CurateGpt\Client\CurateGptHttpClient:
+        arguments:
+            $curateGptClient: '@curate_gpt.client'
+
+    App\ConnectedApps\Apps\Fair3r\Client\Fair3rHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\Fair3r\Client\Fair3rHttpClient'
+
+    App\ConnectedApps\Apps\Fair3r\Client\Fair3rHttpClient:
+        arguments:
+            $fair3rClient: '@fair3r.client'
+
+    App\ConnectedApps\Apps\Fair3r\Client\ClientInterface:
+        alias: 'App\ConnectedApps\Apps\Fair3r\Client\Client'
+
+    App\ConnectedApps\Apps\Fair3r\Fair3rService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\Elabftw\ElabftwService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\Osf\OsfService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\PreclinicalTrials\PreclinicalTrialsService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClient'
+
+    App\ConnectedApps\Apps\Tecniplast\Import\DvcImportServiceInterface:
+        alias: 'App\ConnectedApps\Apps\Tecniplast\Import\DvcImportService'
+
+    App\ConnectedApps\Apps\Tecniplast\TecniplastService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\ConnectedAppServiceFactory:
+        arguments:
+            $connectedAppRepository: !tagged_iterator app.connected_app_service
+
+    App\Service\SensorAgentClient:
+        arguments:
+            $baseUrl: '%sensor_agent_base_url%'
+            $token: '%sensor_agent_token%'
+            $timeout: '%sensor_agent_timeout%'
+            $enabled: '%sensor_agent_enabled%'
+
+    App\Service\SensorAgentClientInterface:
+        alias: 'App\Service\SensorAgentClient'
+
+    App\Export\Nwb\NwbExportService:
+        arguments:
+            $nwbToolsDir: '%kernel.project_dir%/tools/nwb'
+
+    App\Import\Nwb\NwbImportService:
+        arguments:
+            $nwbToolsDir: '%kernel.project_dir%/tools/nwb'
+
+    App\Demo\Sensors\SensorDemoService:
+        arguments:
+            $cache: '@cache.app'
+
+    App\Curation\Provider\MockLLMCurationProvider:
+        arguments:
+            $mode: '%llm_curation_mock_mode%'
+        tags:
+            - { name: 'app.llm_curation_provider', alias: 'mock' }
+
+    App\Curation\Provider\CurateGptOntologyProvider:
+        tags:
+            - { name: 'app.llm_curation_provider', alias: 'curate_gpt' }
+
+    App\Curation\LLMCurationProviderRegistry:
+        arguments:
+            $providers: !tagged_iterator { tag: 'app.llm_curation_provider', index_by: 'alias' }
+            $defaultProvider: '%llm_curation_provider%'
+
+    App\AI\Governance\AiFeatureFlags:
+        arguments:
+            $assistantEnabled: '%ai.assistant_enabled%'
+            $provider: '%ai.provider%'
+            $defaultModel: '%ai.default_model%'
+            $enabledTasks: '%ai.enabled_tasks%'
+            $sandboxEnabled: '%ai.sandbox_enabled%'
+            $humanApprovalRequired: '%ai.human_approval_required%'
+            $writeActionsEnabled: '%ai.write_actions_enabled%'
+
+    App\AI\Gateway\NullModelGateway:
+        arguments:
+            $modelName: '%ai.default_model%'
+        tags:
+            - { name: 'app.model_gateway', alias: 'null' }
+
+    App\AI\Gateway\MockModelGateway:
+        arguments:
+            $modelName: '%ai.default_model%'
+        tags:
+            - { name: 'app.model_gateway', alias: 'mock' }
+
+    App\AI\Gateway\CurateGptModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'curate_gpt' }
+
+    App\AI\Gateway\AccountAwareModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'account' }
+
+    App\AI\Credentials\SecretCipher:
+        arguments:
+            $appSecret: '%env(APP_SECRET)%'
+
+    # Default secret-store binding. Override this alias in deployment-specific
+    # config (e.g. config/services_prod.yaml) to plug in a managed secret
+    # backend such as Vault, AWS Secrets Manager, or GCP Secret Manager.
+    App\Secrets\SecretStoreInterface: '@App\AI\Credentials\SecretCipher'
+
+    App\AI\Credentials\LlmProviderCredentialService:
+        arguments:
+            $openAiApiKey: '%ai.openai_api_key%'
+            $openAiModel: '%ai.openai_model%'
+            $anthropicApiKey: '%ai.anthropic_api_key%'
+            $anthropicModel: '%ai.anthropic_model%'
+
+    App\AI\Gateway\OpenAiModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'openai' }
+
+    App\AI\Gateway\AnthropicModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'anthropic' }
+
+    App\AI\Gateway\ModelGatewayRegistry:
+        arguments:
+            $gateways: !tagged_iterator { tag: 'app.model_gateway', index_by: 'alias' }
+            $defaultGateway: '%ai.provider%'
+
+    App\AI\Mcp\McpBridgeService:
+        arguments:
+            $enabled: '%ai.mcp_bridge_enabled%'
+            $approvedTools:
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['get_live_sensor_health', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['get_live_sensor_observation', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['get_live_sensor_threshold_status', true, false, false]
+
+    App\Mcp\Http\McpController:
+        decorates: 'mcp.server.controller'
+        arguments:
+            $server: '@mcp.server'
+            $httpMessageFactory: '@mcp.psr_http_factory'
+            $httpFoundationFactory: '@mcp.http_foundation_factory'
+            $responseFactory: '@mcp.psr17_factory'
+            $streamFactory: '@mcp.psr17_factory'
+            $logger: '@logger'
+        public: true
+        tags:
+            - { name: 'controller.service_arguments' }
+            - { name: 'monolog.logger', channel: 'mcp' }
+
+    App\Mcp\JsonSchema\ParameterSchemaFactory:
+        decorates: 'api_platform.mcp.json_schema.schema_factory'
+        arguments:
+            $decorated: '@App\Mcp\JsonSchema\ParameterSchemaFactory.inner'
+
+when@dev:
+    services:
+        App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock:
+            decorates: 'elabftw.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock.elabftw.client'
+#        App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock:
+#            decorates: 'App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClient'
+#            decoration_inner_name: 'App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock.tecniplast.client'
+#            arguments: ['@.inner']
+
+
+when@test:
+    services:
+#    public: true
+#        App\Tests\Api\Security\:
+#            resource: '../tests/Api/Security/'
+#            autowire: true
+#            autoconfigure: true
+#            public: true
+    # ...
+#        App\ConnectedApps\Apps\Fair3r\Command\SyncCommandProcessor:
+#            alias: Fair3rCommandProcessor.test
+#            public: true
+
+        App\ConnectedApps\Apps\Fair3r\Client\Mock\HttpClientMock:
+            decorates: 'fair3r.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Fair3r\Client\Mock\HttpClientMock.fair3r.client'
+            arguments: ['@.inner']
+        App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock:
+            decorates: 'App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClient'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock.tecniplast.client'
+            arguments: ['@.inner']
+        App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock:
+            decorates: 'elabftw.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock.elabftw.client'

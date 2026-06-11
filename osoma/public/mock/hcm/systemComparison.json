@@ -1,0 +1,190 @@
+{
+  "systems": [
+    {
+      "id": "hcm-dvc",
+      "system": "Tecniplast DVC",
+      "modalities": ["activity", "environment", "sinusoid extraction"],
+      "sourceAppCode": "tecniplast_dvc",
+      "cageCount": 2
+    },
+    {
+      "id": "hcm-olden",
+      "system": "Olden Labs HCM",
+      "modalities": ["video tracking", "sinusoid extraction"],
+      "sourceAppCode": "olden_labs_hcm",
+      "cageCount": 2
+    },
+    {
+      "id": "hcm-lmt",
+      "system": "Live Mouse Tracker",
+      "modalities": ["RFID", "video tracking", "social proximity"],
+      "sourceAppCode": "live_mouse_tracker",
+      "cageCount": 2
+    },
+    {
+      "id": "hcm-beatbox",
+      "system": "Open-BEATBox",
+      "modalities": ["video tracking", "cognitive events", "in vivo recordings"],
+      "sourceAppCode": "open_beatbox",
+      "cageCount": 2
+    }
+  ],
+  "cages": [
+    {
+      "cageId": "DVC-BENCH-CAGE-01",
+      "system": "Tecniplast DVC",
+      "modalities": ["activity", "environment", "sinusoid extraction"],
+      "location": { "facility": "Demo Rodent Facility", "room": "B-201", "rack": "rack-DVC-BENCH-CAGE-01" },
+      "animals": [
+        {
+          "animalId": "DVC-BENCH-RFID-0001",
+          "metadata": {
+            "species": "mouse",
+            "strain": "C57BL/6J",
+            "sex": "male",
+            "ageWeeks": 12,
+            "genotype": "Shank3+/+",
+            "supplier": "demo colony",
+            "sanitaryStatus": "SPF",
+            "project": "Circadian Rhythms Investigation",
+            "protocol": "HCM benchmark: activity index, environment telemetry, sinusoid extraction",
+            "treatment": "DVC baseline",
+            "facility": "Demo Rodent Facility",
+            "room": "B-201",
+            "rack": "rack-DVC-BENCH-CAGE-01",
+            "beddingType": "oak",
+            "dietType": "standard chow",
+            "waterSystem": "available",
+            "temperatureMean": 22,
+            "humidityMean": 50,
+            "lightCycle": "12:12",
+            "noiseLevel": "standard",
+            "dvcSystem": "Tecniplast DVC",
+            "firmwareVersion": "demo-tecniplast-dvc",
+            "analyticsVersion": "mirosine-hcm-1",
+            "sourceApp": "tecniplast_dvc",
+            "modalities": ["activity", "environment", "sinusoid extraction"]
+          },
+          "circadianParameters": { "amplitude": 18.4, "phase": 1.62, "baseline": 42, "noise": 0.08 }
+        }
+      ]
+    },
+    {
+      "cageId": "OLDEN-HCM-CAGE-01",
+      "system": "Olden Labs HCM",
+      "modalities": ["video tracking", "sinusoid extraction"],
+      "location": { "facility": "Demo Rodent Facility", "room": "B-201", "rack": "rack-OLDEN-HCM-CAGE-01" },
+      "animals": [
+        {
+          "animalId": "OLDEN-HCM-RFID-0001",
+          "metadata": {
+            "species": "mouse",
+            "strain": "C57BL/6J",
+            "sex": "male",
+            "ageWeeks": 12,
+            "genotype": "Shank3+/+",
+            "supplier": "demo colony",
+            "sanitaryStatus": "SPF",
+            "project": "Circadian Rhythms Investigation",
+            "protocol": "HCM benchmark: video activity index, video immobility bouts, sinusoid extraction",
+            "treatment": "video-only baseline",
+            "facility": "Demo Rodent Facility",
+            "room": "B-201",
+            "rack": "rack-OLDEN-HCM-CAGE-01",
+            "beddingType": "oak",
+            "dietType": "standard chow",
+            "waterSystem": "available",
+            "temperatureMean": 22,
+            "humidityMean": 50,
+            "lightCycle": "12:12",
+            "noiseLevel": "standard",
+            "dvcSystem": "Olden Labs HCM",
+            "firmwareVersion": "demo-olden-labs-hcm",
+            "analyticsVersion": "mirosine-hcm-1",
+            "sourceApp": "olden_labs_hcm",
+            "modalities": ["video tracking", "sinusoid extraction"]
+          },
+          "circadianParameters": { "amplitude": 16.8, "phase": 1.48, "baseline": 39.5, "noise": 0.1 }
+        }
+      ]
+    },
+    {
+      "cageId": "LMT-CAGE-01",
+      "system": "Live Mouse Tracker",
+      "modalities": ["RFID", "video tracking", "social proximity"],
+      "location": { "facility": "Demo Rodent Facility", "room": "B-201", "rack": "rack-LMT-CAGE-01" },
+      "animals": [
+        {
+          "animalId": "LMT-RFID-0001",
+          "metadata": {
+            "species": "mouse",
+            "strain": "C57BL/6J",
+            "sex": "male",
+            "ageWeeks": 12,
+            "genotype": "Shank3+/+",
+            "supplier": "demo colony",
+            "sanitaryStatus": "SPF",
+            "project": "Circadian Rhythms Investigation",
+            "protocol": "HCM benchmark: RFID occupancy, video tracking distance, social proximity",
+            "treatment": "RFID + video social tracking",
+            "facility": "Demo Rodent Facility",
+            "room": "B-201",
+            "rack": "rack-LMT-CAGE-01",
+            "beddingType": "oak",
+            "dietType": "standard chow",
+            "waterSystem": "available",
+            "temperatureMean": 22,
+            "humidityMean": 50,
+            "lightCycle": "12:12",
+            "noiseLevel": "standard",
+            "dvcSystem": "Live Mouse Tracker",
+            "firmwareVersion": "demo-live-mouse-tracker",
+            "analyticsVersion": "mirosine-hcm-1",
+            "sourceApp": "live_mouse_tracker",
+            "modalities": ["RFID", "video tracking", "social proximity"]
+          },
+          "circadianParameters": { "amplitude": 22.7, "phase": 1.92, "baseline": 47, "noise": 0.12 }
+        }
+      ]
+    },
+    {
+      "cageId": "BEATBOX-CAGE-01",
+      "system": "Open-BEATBox",
+      "modalities": ["video tracking", "cognitive events", "in vivo recordings"],
+      "location": { "facility": "Demo Rodent Facility", "room": "B-201", "rack": "rack-BEATBOX-CAGE-01" },
+      "animals": [
+        {
+          "animalId": "BEATBOX-RFID-0001",
+          "metadata": {
+            "species": "mouse",
+            "strain": "C57BL/6J",
+            "sex": "male",
+            "ageWeeks": 12,
+            "genotype": "Shank3+/+",
+            "supplier": "demo colony",
+            "sanitaryStatus": "SPF",
+            "project": "Circadian Rhythms Investigation",
+            "protocol": "HCM benchmark: video tracking distance, cognitive nose-poke events, in vivo calcium signal",
+            "treatment": "cognitive + in vivo recording",
+            "facility": "Demo Rodent Facility",
+            "room": "B-201",
+            "rack": "rack-BEATBOX-CAGE-01",
+            "beddingType": "oak",
+            "dietType": "standard chow",
+            "waterSystem": "available",
+            "temperatureMean": 22,
+            "humidityMean": 50,
+            "lightCycle": "12:12",
+            "noiseLevel": "standard",
+            "dvcSystem": "Open-BEATBox",
+            "firmwareVersion": "demo-open-beatbox",
+            "analyticsVersion": "mirosine-hcm-1",
+            "sourceApp": "open_beatbox",
+            "modalities": ["video tracking", "cognitive events", "in vivo recordings"]
+          },
+          "circadianParameters": { "amplitude": 14.9, "phase": 1.28, "baseline": 36.8, "noise": 0.11 }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+=== EXPERIMENT REPORT ===
+{{ report.study.name }}
+Generated: {{ generatedAt }} UTC
+
+--- Study Overview ---
+Study ID         : {{ report.study.id }}
+Investigation    : {{ report.study.investigationName }} ({{ report.study.investigationId }})
+Protocol         : {{ report.study.protocol }}
+Study goal       : {{ report.study.goal }}
+Start date       : {{ report.study.startAt }}
+End date         : {{ report.study.endAt }}
+Repository link  : {{ report.study.repositoryLink }}
+License          : {{ report.study.license }}
+{% if report.study.externalId %}
+External ID      : {{ report.study.externalId }}
+{% endif %}
+{% if report.study.elabftwId %}
+eLabFTW ID       : {{ report.study.elabftwId }}
+{% endif %}
+{% if report.study.fair3rId %}
+FAIR3r ID        : {{ report.study.fair3rId }}
+{% endif %}
+
+--- Animal Population ({{ report.subjects|length }} subjects) ---
+{% if report.subjects is empty %}
+No subjects linked to this study.
+{% else %}
+{% for s in report.subjects %}
+  Subject: {{ s.name }}  |  Species: {{ s.species }}  |  Strain: {{ s.strain }}  |  Sex: {{ s.sex }}{% if s.genotype is not empty %}  |  Genotype: {{ s.genotype }}{% endif %}{% if s.weight is not null %}  |  Weight: {{ s.weight }} g{% endif %}{% if s.cage is not empty %}  |  Cage: {{ s.cage }}{% endif %}
+
+{% endfor %}
+{% endif %}
+
+--- Housing Conditions ({{ report.cages|length }} cages) ---
+{% if report.cages is empty %}
+No cage records linked to this study.
+{% else %}
+{% for c in report.cages %}
+  Cage: {{ c.name }}  |  Type: {{ c.type }}  |  Format: {{ c.format }}  |  Bedding: {{ c.bedding }}{% if c.monitoring is not empty %}  |  DVC monitoring: {{ c.monitoring }}{% endif %}{% if c.facility is not empty %}  |  Facility: {{ c.facility }}{% endif %}
+
+{% endfor %}
+{% endif %}
+
+--- Procedures / Provenance ({{ report.procedures|length }} procedures) ---
+{% if report.procedures is empty %}
+No procedure records linked to this study.
+{% else %}
+{% for p in report.procedures %}
+  [{{ p.state }}] {{ p.name }}  |  Start: {{ p.startAt }}  |  End: {{ p.endAt }}  |  Subjects: {{ p.subjectCount }}
+{% endfor %}
+{% endif %}
+
+--- FAIR Score Summary ---
+Overall score  : {{ report.fairScore.total }} / 100
+  Findable     : {{ report.fairScore.findable }} / 100
+  Accessible   : {{ report.fairScore.accessible }} / 100
+  Interoperable: {{ report.fairScore.interoperable }} / 100
+  Reusable     : {{ report.fairScore.reusable }} / 100
+
+--- FAIR Criteria Detail ---
+{% for pillar, items in report.fairCriteria %}
+[ {{ pillar|upper }} ]
+{% for item in items %}
+  [{{ item.pass ? 'PASS' : 'FAIL' }}] {{ item.id }} - {{ item.label }}
+       {{ item.description }}
+       Note: {{ item.note }}
+
+{% endfor %}
+{% endfor %}
+
+--- FAIR Completeness Warnings ---
+{% if report.fairWarnings is empty %}
+No FAIR compliance issues detected.
+{% else %}
+{% for warning in report.fairWarnings %}
+- {{ warning }}
+{% endfor %}
+{% endif %}
+
+--- End of Report ---

@@ -1,0 +1,31 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "mapp": "https://schema.org/",
+    "schema": "https://schema.org/",
+
+    "Experiment": "schema:MedicalStudy",
+    "Study": "schema:MedicalStudy",
+    "Project": "schema:ResearchProject",
+    "Investigation": "schema:ResearchProject",
+    "Subject": "schema:Patient",
+    "TimeSeries": "schema:Dataset",
+    "Behavior": "schema:MedicalProcedure",
+    "Procedure": "schema:MedicalProcedure",
+    "Cage": "schema:Place",
+
+    "goal": "schema:description",
+    "protocol": "schema:measurementTechnique",
+    "startAt": "schema:startDate",
+    "endAt": "schema:endDate",
+    "repositoryLink": "schema:codeRepository",
+    "externalId": "schema:identifier",
+    "protocolUri": "schema:url",
+    "species": "schema:taxonomicRange",
+    "strain": "schema:additionalType",
+    "sex": "schema:gender",
+    "recordedAt": "schema:startTime",
+    "value": "schema:value",
+    "unit": "schema:unitCode"
+  }
+}
