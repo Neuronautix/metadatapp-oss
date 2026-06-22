@@ -1,3 +1,11 @@
+## [2026-06-22] lint | wiki quality check
+
+- Operation: lint
+- Source: scheduled
+- Pages touched: INDEX.md, LOG.md
+- Issues found: 119
+- Notes: boilerplate: 2; coverage-drift: 106; missing-frontmatter: 2; orphan: 1; stale: 8
+
 ---
 ### Wiki Log
 
