@@ -1,0 +1,67 @@
+name: Repo Declarations (reusable)
+
+# Reusable workflow so *other* repositories can run the same declaration
+# generator without vendoring the script. Each consumer repo keeps its own
+# .declarations.yml. Call it from a one-line workflow:
+#
+#   jobs:
+#     declarations:
+#       uses: Neuronautix/metadatapp/.github/workflows/declarations-reusable.yml@main
+#
+# On pull_request it checks for drift (fails the PR); on push to the default
+# branch it regenerates and commits any drift.
+
+on:
+  workflow_call:
+    inputs:
+      generator_ref:
+        description: Git ref of metadatapp to fetch the generator from.
+        type: string
+        default: main
+
+jobs:
+  declarations:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the calling repository
+        uses: actions/checkout@v5
+        with:
+          path: target
+
+      - name: Fetch the declaration generator
+        uses: actions/checkout@v5
+        with:
+          repository: Neuronautix/metadatapp
+          ref: ${{ inputs.generator_ref }}
+          path: generator
+          sparse-checkout: scripts/generate-declarations.py
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Check declarations (pull requests)
+        if: github.event_name == 'pull_request'
+        run: python3 generator/scripts/generate-declarations.py --root target --check
+
+      - name: Refresh and commit drift (default branch)
+        if: github.event_name == 'push'
+        working-directory: target
+        run: |
+          python3 ../generator/scripts/generate-declarations.py --root .
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: refresh repository declarations"
+            git push
+          else
+            echo "Declarations already up to date."
+          fi

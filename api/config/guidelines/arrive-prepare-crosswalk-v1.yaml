@@ -1,0 +1,13 @@
+id: arrive-prepare-crosswalk-v1
+name: "ARRIVE + PREPARE Crosswalk"
+version: "1.0"
+description: "Owns ZERO fields of its own. Purely the union of ARRIVE's reporting fields and PREPARE's planning fields, so a single metadata pass fills and reports both standards. The cross-annotations (a field carrying both arrive_section and prepare_section) live on the PREPARE entries."
+identifier: "https://w3id.org/arrive-prepare-crosswalk"
+conforms_to: [arrive-v2, prepare-v1]
+ontology:
+  iri: "https://w3id.org/arrive-prepare#"
+  prefix: "axp"
+fair_bonus:
+  dimension: R
+  max_points: 5
+source: builtin

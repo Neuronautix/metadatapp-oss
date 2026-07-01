@@ -1,0 +1,90 @@
+name: "Documentation"
+
+# Builds the Metadatapp User & Integration Guide (Sphinx + MyST), checks that the
+# Connected Apps pages stay in sync with the AppCode enum, and publishes the site
+# to GitHub Pages on pushes to main. Building + checking is secret-free and
+# fork-friendly; only the deploy job needs Pages permissions and is skipped on PRs.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "docs/guide/**"
+      - "osoma/resources/metadatapp.json"
+      - "scripts/check_connected_apps_docs.py"
+      - "api/src/Enum/AppCode.php"
+      - ".readthedocs.yaml"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    paths:
+      - "docs/guide/**"
+      - "osoma/resources/metadatapp.json"
+      - "scripts/check_connected_apps_docs.py"
+      - "api/src/Enum/AppCode.php"
+      - ".readthedocs.yaml"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Allow one concurrent deployment; don't cancel an in-progress production deploy.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: "Build guide and check coverage"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install documentation dependencies
+        run: pip install -r docs/guide/requirements.txt
+
+      - name: "Check Connected Apps docs match the AppCode enum"
+        run: python3 scripts/check_connected_apps_docs.py
+
+      - name: "Build the guide (warnings are errors)"
+        run: sphinx-build -W -b html docs/guide docs/guide/_build/html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/guide/_build/html
+
+  deploy:
+    name: "Publish to GitHub Pages"
+    # Build/check runs on every PR; only publish from main (or manual dispatch).
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    # Publishing is best-effort and depends on a one-time setup: GitHub Pages must
+    # be enabled (Settings -> Pages -> Source: "GitHub Actions"). Private repos
+    # need a paid plan for Pages, or the repo can be public. A publish failure must
+    # NOT redden the docs workflow -- the build job above is the real gate -- so
+    # this job continues-on-error and tries to enable Pages automatically.
+    continue-on-error: true
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages (auto-enable if possible)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

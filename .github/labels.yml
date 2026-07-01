@@ -1,0 +1,65 @@
+# GitHub issue/PR labels for the public Metadatapp repository.
+#
+# Apply with the `github/issue-labeler` action or any tool that consumes this
+# format (e.g. `gh label sync -F .github/labels.yml`). The labels below are the
+# minimum recommended set for public-preview readiness.
+
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers — limited scope, mentor available.
+
+- name: help wanted
+  color: 008672
+  description: Maintainers welcome external contributions on this.
+
+- name: security
+  color: b60205
+  description: Security-related issue. See SECURITY.md before commenting publicly.
+
+- name: question
+  color: cc317c
+  description: Request for information rather than a defect or feature.
+
+- name: bug
+  color: d73a4a
+  description: Confirmed defect — reproduces and has expected vs. actual.
+
+- name: enhancement
+  color: a2eeef
+  description: Feature request or improvement to existing behavior.
+
+- name: documentation
+  color: 0075ca
+  description: Improvements or additions to documentation.
+
+- name: backend
+  color: 5319e7
+  description: PHP / Symfony / API Platform.
+
+- name: frontend
+  color: fbca04
+  description: Osoma React app.
+
+- name: infrastructure
+  color: 0e8a16
+  description: Docker, Castor tasks, CI/CD, deployment.
+
+- name: connected-apps
+  color: c5def5
+  description: External integrations (eLabFTW, SoftMouse, Tecniplast DVC, Fair3r, …).
+
+- name: ai-curation
+  color: bfd4f2
+  description: LLM-based metadata curation and CurateGPT.
+
+- name: needs-triage
+  color: ededed
+  description: Awaiting maintainer review and prioritization.
+
+- name: blocked
+  color: e99695
+  description: Cannot proceed without an external dependency or decision.
+
+- name: stale
+  color: ededed
+  description: Marked inactive by automation; will close if not refreshed.

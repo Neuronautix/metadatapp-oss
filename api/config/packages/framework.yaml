@@ -1,0 +1,73 @@
+# see https://symfony.com/doc/current/reference/configuration/framework.html
+framework:
+    secret: '%env(APP_SECRET)%'
+    #csrf_protection: true
+    http_method_override: false
+    handle_all_throwables: true
+
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    #trusted_hosts: '%env(TRUSTED_HOSTS)%'
+    # See https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#defaults
+    trusted_headers: [ 'x-forwarded-for', 'x-forwarded-proto' ]
+    #trusted_headers: [ 'x-forwarded-for', 'x-forwarded-proto', 'x-forwarded-host' ]
+
+    # Enables session support. Note that the session will ONLY be started if you read or write from it.
+    # Remove or comment this section to explicitly disable session support.
+    #session:
+    #    handler_id: null
+    #    cookie_secure: auto
+    #    cookie_samesite: lax
+    #    storage_factory_id: session.storage.factory.native
+
+    #esi: true
+    #fragments: true
+    php_errors:
+        log: true
+
+    property_info:
+        enabled: true
+
+    http_client:
+        scoped_clients:
+            # use scoped client to ease mock on functional tests
+            security.authorization.client:
+                base_uri: '%env(OIDC_SERVER_URL_INTERNAL)%/'
+            soft_mouse.client:
+                base_uri: '%env(SOFTMOUSE_API_URL)%/'
+                headers:
+                    Accept: 'application/json'
+            fair3r.client:
+                base_uri: '%env(FAIR3R_API_URL)%/'
+                headers:
+                    Accept: 'application/json'
+                    Content-Type: 'application/json'
+                    Authorization: '%env(FAIR3R_API_TOKEN)%'
+            elabftw.client:
+                base_uri: '%env(ELABFTW_API_URL)%/'
+                headers:
+                    Accept: 'application/json'
+                    Content-Type: 'application/json'
+                    Authorization: '%env(ELABFTW_API_KEY)%'
+            curate_gpt.client:
+                base_uri: '%env(CURATE_GPT_BASE_URL)%/'
+                headers:
+                    Accept: 'application/json'
+                    Content-Type: 'application/json'
+            jax_phenome.client:
+                # Browse-only public client; the client builds absolute URLs from
+                # ConnectedApp::getExternalUrl(), so this base_uri is only a fallback
+                # and exists mainly so the client can be mocked in functional tests.
+                base_uri: '%env(JAX_PHENOME_API_URL)%/'
+                headers:
+                    Accept: 'application/json'
+            impc.client:
+                # Browse-only public client for the IMPReSS (IMPC) standardized-screen
+                # catalogue; like jax_phenome.client this base_uri is only a fallback
+                # because the client builds absolute URLs from ConnectedApp::getExternalUrl().
+                base_uri: '%env(IMPC_API_URL)%/'
+                headers:
+                    Accept: 'application/json'
+
+when@test:
+    framework:
+        test: true

@@ -1,0 +1,103 @@
+● Synthèse de la réunion (6 personas)
+
+  Top 5 problèmes (convergence des personas)
+
+  1. Profondeur sémantique FAIR cosmétique (architecte, RSE, chercheuse — 3 personas)
+  @context déclare 10 vocabulaires mais le payload n'en utilise quasi aucun : procédures en sc:Thing, génotypes en strings, pas de QUDT sur les unités, pas de
+  NCBITaxon/MGI/PATO/OBI sur les entités scientifiques. C'est une trahison du contrat FAIR — passe les checkers automatiques, échoue un peer-review sémantique.
+  L'audit l'avait notée P3 ; en réalité c'est bloquant pour la value proposition du projet.
+  2. Modèle de données ARRIVE incomplet (chercheuse, RSE)
+  Concepts critiques manquants : autorisation éthique animale (CEEA, n° de protocole 3R), batches/cohortes d'animaux, randomisation, blinding, sample-size
+  justification, dose-response, adverse events, longitudinal timeline (jour-0 implant → jour-14 imagerie → endpoint). Le template ARRIVE existe mais ne valide
+  rien. Une chercheuse ne pourra pas publier avec ça en l'état.
+  3. Mensonge "Connected Apps" + mock-mode caché (PO, dev OSS)
+  Cinq intégrations annoncées, une seule fonctionne (eLabFTW). MSW est actif par défaut sans avertissement clair. Un visiteur perd 20 minutes à comprendre
+  pourquoi son backend "ne répond pas" alors que le frontend tourne en mock. C'est le frein d'adoption #1.
+  4. Risques archi sous-estimés : idempotence, AccountAware update, provenance, versioning (architecte, RSE)
+  Les Synchronizer n'ont aucune protection idempotence (relance après timeout = doublons). SetAccountProcessor ne couvre que la création — les updates dépendent
+  de voters qu'un futur dev peut oublier. Pas de PROV-O, pas de DOI, pas de versioning des RO-Crates exportés. Datasets non-citables.
+  5. Friction d'onboarding pour un nouveau-venu non-domaine (dev OSS, agentic)
+  "FAIR" jamais défini avant d'être utilisé. AGENTS.md fait peur en première lecture. 4 emplacements de méta-agents (AGENTS.md, CLAUDE.md, .agent/,
+  .github/agents/). Pour un dev moyen sans connaissance métier, le projet a l'air sur-ingénieré avant lecture du code.
+
+  3 pistes d'amélioration (priorisées, à fort effet de levier)
+
+  1. Refondre le FAIR² builder pour qu'il utilise les ontologies déclarées + ajouter PROV-O / DOIs.
+  NCBITaxon pour species, MGI pour genotype, PATO pour phenotype, OBI procedure codes, QUDT units sur chaque mesure, prov:wasDerivedFrom vers les sources
+  externes (eLabFTW/SoftMouse), versioning + identifiant DataCite-style sur le RO-Crate. Effort : 2–3 semaines. Impact : transforme le projet d'un wrapper FAIR à
+   un outil scientifiquement défensable.
+  2. Compléter le modèle ARRIVE/scientifique + ajouter une couche d'invariants archi.
+  Nouvelles entités : Cohort/Batch, EthicsAuthorisation, RandomizationPlan, BlindingScheme, SampleSizeJustification, AdverseEvent, StudyTimeline. En parallèle :
+  AccountAwareProcessorDecorator couvrant Create/Update/Delete (au lieu des voters seuls), et SyncIdempotenceStore (Redis ou table SQL) sur les Synchronizer.
+  Plus un vrai validateur ARRIVE Essential-10. Effort : 4–6 semaines. Impact : passage de "preview" à "publication-grade".
+  3. Couche d'accueil + couche agentique productive : MCP server + evals + README "5 lignes".
+    - README haut de page : 1 phrase sur ce que fait l'outil, 1 phrase qui définit FAIR, 1 callout "Mock mode actif par défaut", 1 capability matrix
+  (Real/Demo/Stub), 1 GIF.
+    - Supprimer les ~700 lignes de méta-agent redondantes (audit §3).
+    - Créer un MCP server metadatapp-mcp qui expose resolve_ownership_scope(), validate_fair_jsonld(), list_known_limitations(). Le projet devient utilisable
+  depuis n'importe quel client agent.
+    - Eval cases dans evals/cases/ pour empêcher la régression des prompts. Effort : 1–2 semaines. Impact : adoption + reproductibilité agents.
+
+  3 points positifs (consensus)
+
+  1. Honnêteté radicale en public (PO, chercheuse) — limitations publiques, dette explicitée, ton direct. La phrase « yes, there is some vibe coding »
+  dans la lettre fait plus pour la confiance que mille slides marketing. Rare dans l'écosystème, et c'est un moat d'adoption.
+  2. Architecture sérieuse, pas du vibe (architecte, PO, RSE, agentic) — Symfony 7.4 + API Platform 4.3 utilisé correctement, AccountAware/UserAware partout,
+  factory ConnectedApps + tagged-iterator, Curation framework switchable, PHPStan 8, Foundry. Le RoCrateExporter est une vraie implémentation conforme à la spec.
+   Une équipe qui rejoint trouve une carte mentale claire en 30 minutes.
+  3. Modèle de données scientifiquement authentique (chercheuse, RSE) — CageFormat (T1/T2/T3 = vrais formats), bedding/enrichment, light-cycle en UTC avec
+  Zeitgeber, Subject(strain, genotype, sex, weight, birthAt), HCM avec lightsOnUtcHour, démo seedée avec Shank3 KO + chirurgie stéréotaxique + open-field +
+  Diazépam. C'est un chercheur qui a fait le scoping, pas un consultant SaaS.
+
+  ---
+  Agents / Skills / MCP recommandés pour la suite
+
+  Pour la phase cleanup P0 (semaine 1)
+
+  - Skill /security-review — passer après les fixes XSS/CSP/file-upload pour vérifier le diff.
+  - Subagent pr-review-toolkit:silent-failure-hunter — à passer sur tous les Synchronizer/* (cherche les try/catch qui mangent les erreurs sans loguer, classique
+   sur les sync I/O).
+  - Subagent pr-review-toolkit:code-simplifier — après suppression des 700 lignes de méta, à passer sur AGENTS.md allégé.
+  - Skill claude-md-management:claude-md-improver — une fois AGENTS.md trimé, l'auditer formellement.
+  - Skill fewer-permission-prompts — analyser les sessions précédentes pour pré-autoriser les commandes Castor / Bash récurrentes (gros gain DX agent).
+
+  Pour le travail FAIR / scientifique (semaines 2–4)
+
+  - Subagent pr-review-toolkit:type-design-analyzer — designer les nouvelles entités domaine (Cohort, EthicsAuthorisation, RandomizationPlan, AdverseEvent,
+  StudyTimeline). C'est exactement son terrain.
+  - Subagent Explore thorough — cartographier toutes les divergences @context ↔ payload dans Fair2JsonLdBuilder et RoCrateExporter.
+  - Subagent pr-review-toolkit:code-reviewer — passage systématique après chaque PR d'ajout d'IRIs ontologiques.
+  - MCP context7 — indispensable pour récupérer la doc à jour de RO-Crate, BioSchemas, OBI, API Platform 4.3 sans halluciner. À utiliser avant chaque PR FAIR.
+  - MCP custom metadatapp-fair-validator — à construire : valide en temps réel qu'un payload JSON-LD utilise effectivement les vocabulaires déclarés dans son
+  @context. Petit Node service ou Python, exposé via MCP. Devient un test de non-régression sémantique.
+
+  Pour la couche agentique (en continu)
+
+  - MCP metadatapp-mcp (à construire, ~2–3 jours) — expose resolve_ownership_scope(file_path), list_known_limitations(), current_capability_matrix(). Rend le
+  projet adoptable depuis Cursor/Codex/Claude Web.
+  - Skill update-config — configurer des hooks Claude Code : post-edit castor qa:cs --dry-run sur les fichiers PHP modifiés, post-edit pnpm lint sur les fichiers
+   TSX, pre-commit gitleaks. Ça évite 80 % des erreurs avant qu'elles atteignent CI.
+  - Skill phpstorm-plugin:php-code-review — utile pour les contributeurs PhpStorm.
+  - Eval cases dans evals/cases/ — fixtures pour : "agent ajoute une entité AccountAware → tenant isolation testée", "agent modifie le @context FAIR → payload
+  valide encore", "agent crée un Synchronizer → idempotence en place". À mettre en place quand le code FAIR/idempotence sera stable.
+
+  Pour la phase E2E / UX (post-cleanup)
+
+  - MCP playwright — déjà disponible, à utiliser pour valider chaque PR frontend dans un navigateur réel (la suite e2e existante est légère).
+  - Skill vercel:verification ou équivalent maison — pas Vercel-spécifique mais le pattern (vérification end-to-end : browser → API → DB → réponse) est
+  exactement ce dont les Connected Apps ont besoin.
+
+  À ignorer dans cet écosystème
+
+  - stripe:*, vercel:*, next-forge, vercel:bootstrap — non pertinent (stack Symfony/Vite, pas Next/Vercel/Stripe).
+  - ralph-loop, loop, schedule — pas un cas de polling/cron.
+
+  ---
+  Ordre d'exécution conseillé pour la prochaine session
+
+  1. Cleanup P0 (audit §7) — 1 session, agent Implementer + silent-failure-hunter en review.
+  2. Construire le MCP metadatapp-fair-validator (le plus grand effet de levier sur la qualité downstream).
+  3. Designer les nouvelles entités domaine via type-design-analyzer.
+  4. Refondre Fair2JsonLdBuilder ontologie par ontologie (PR par PR, code-reviewer à chaque pas).
+  5. Configurer les hooks Claude Code via update-config.
+  6. Tagger v0.1.0-public-preview une fois P0+P1 fermés.

@@ -1,0 +1,29 @@
+framework:
+    messenger:
+        default_bus: messenger.bus.default
+        buses:
+            messenger.bus.default:
+#                default_middleware: allow_no_handlers
+        transports:
+            async:
+                dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+                retry_strategy:
+                    max_retries: 3
+                    delay: 500
+                    multiplier: 2
+                    max_delay: 30000
+            failed:
+                dsn: 'doctrine://default?queue_name=_failed'
+            sync:
+                dsn: 'sync://'
+        routing:
+            # Route your messages to the transports
+            App\ConnectedApps\Messenger\Message\SyncAppMessageInterface: async
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                # replace with your transport name here (e.g., my_transport: 'in-memory://')
+                # For more Messenger testing tools, see https://github.com/zenstruck/messenger-test
+#                async_apps: 'in-memory://'

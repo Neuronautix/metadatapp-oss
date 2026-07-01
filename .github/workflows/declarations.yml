@@ -1,0 +1,69 @@
+name: Repo Declarations
+
+# Keeps the machine- and human-readable repository declarations
+# (FAIR.md, TRUST.md, AI-declaration.md, design declaration, llms.txt and the
+# .well-known index) in sync with the repository.
+#
+#   * On pull requests: fail if the committed declarations are out of date.
+#   * On push to main:   regenerate and commit any drift automatically.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check declarations are current
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Verify declarations are up to date
+        run: python3 scripts/generate-declarations.py --check
+
+  refresh:
+    name: Refresh declarations on main
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pyyaml
+
+      - name: Regenerate declarations
+        run: python3 scripts/generate-declarations.py
+
+      - name: Commit any drift
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "chore: refresh repository declarations"
+            git push
+          else
+            echo "Declarations already up to date."
+          fi

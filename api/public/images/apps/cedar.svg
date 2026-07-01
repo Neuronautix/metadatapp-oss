@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>CEDAR</title>
+  <rect width="64" height="64" rx="12" fill="#166534"/>
+  <path d="M32 10l14 18H36l12 16H36l6 10H22l6-10H16l12-16H18z" fill="#dcfce7"/>
+  <path d="M32 18v36" stroke="#14532d" stroke-width="4" stroke-linecap="round"/>
+</svg>

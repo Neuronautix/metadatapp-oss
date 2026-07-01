@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource
+    xmlns="http://datacite.org/schema/kernel-4"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.5/metadata.xsd">
+    <alternateIdentifiers>
+        <alternateIdentifier alternateIdentifierType="URL">https://validation.fair3r.fr/dataset/15f70db7-4d72-4f61-b37c-55870fcfe51e</alternateIdentifier>
+    </alternateIdentifiers>
+    <creators>
+        <creator>
+            <creatorName nameType="Personal">bouri, laurent</creatorName>
+            <givenName>laurent</givenName>
+            <familyName>bouri</familyName>
+            <nameIdentifier nameIdentifierScheme="ORCID" schemeURI="https://orcid.org/">https://orcid.org/0000-0002-2297-1559</nameIdentifier>
+            <affiliation affiliationIdentifier="https://ror.org/0015ws592" affiliationIdentifierScheme="ROR" schemeURI="https://ror.org/">Institut de génétique et de biologie moléculaire et cellulaire</affiliation>
+        </creator>
+    </creators>
+    <titles>
+        <title>kljlkdsfsd</title>
+    </titles>
+    <publisher publisherIdentifier="https://ror.org/03cjqqq10" publisherIdentifierScheme="ROR" schemeURI="https://ror.org/">Institut Clinique de la Souris</publisher>
+    <publicationYear>2026</publicationYear>
+    <subjects>
+        <subject subjectScheme="NCBITaxon" schemeURI="http://purl.obolibrary.org/obo/" valueURI="http://purl.obolibrary.org/obo/NCBITaxon_10090">Mus musculus</subject>
+        <subject subjectScheme="speciesBackground" valueURI="http://www.ebi.ac.uk/efo/EFO_0011030">C57BL/6NCrl</subject>
+        <subject subjectScheme="geneAccessionId" valueURI="https://identifiers.org/ncbigene:11816">Apoe</subject>
+        <subject subjectScheme="geneChromosomeLocation">7:19430034-19433113</subject>
+        <subject subjectScheme="alleleAccessionId" valueURI="https://identifiers.org/MGI:6257508">Apoe&lt;em1(IMPC)Bay&gt;</subject>
+        <subject subjectScheme="geneMutationType">Endonuclease-mediated</subject>
+        <subject subjectScheme="ChEBI" valueURI="http://purl.obolibrary.org/obo/CHEBI_32663">tamoxifen N-beta-D-glucosiduronic acid</subject>
+        <subject subjectScheme="EFO" valueURI="http://www.ebi.ac.uk/efo/EFO_0002757">high fat diet</subject>
+        <subject subjectScheme="DOID" valueURI="http://purl.obolibrary.org/obo/DOID_10652">Alzheimer's disease</subject>
+        <subject subjectScheme="UBERON" valueURI="http://purl.obolibrary.org/obo/UBERON_0000955">brain</subject>
+        <subject subjectScheme="geneSymbol">Apoe</subject>
+        <subject subjectScheme="alleleSymbol">Apoe&lt;em1(IMPC)Bay&gt;</subject>
+        <subject subjectScheme="treatmentName">tamoxifen N-beta-D-glucosiduronic acid</subject>
+        <subject subjectScheme="treatmentProtocol">acute</subject>
+        <subject subjectScheme="treatmentDesign">50 mg/kg, IP, 3 doses, 7 days, 1x/day, anesthesia: none, vehicle: saline 0.9%</subject>
+    </subjects>
+    <contributors>
+        <contributor contributorType="Researcher">
+            <contributorName nameType="Personal">bouri, laurent</contributorName>
+            <givenName>laurent</givenName>
+            <familyName>bouri</familyName>
+            <nameIdentifier nameIdentifierScheme="ORCID" schemeURI="https://orcid.org/">https://orcid.org/0000-0002-2297-1559</nameIdentifier>
+            <affiliation affiliationIdentifier="https://ror.org/0015ws592" affiliationIdentifierScheme="ROR" schemeURI="https://ror.org/">Institut de génétique et de biologie moléculaire et cellulaire</affiliation>
+        </contributor>
+        <contributor contributorType="ContactPerson">
+            <contributorName nameType="Organizational">cellulaire, Institut de génétique et de biologie moléculaire et</contributorName>
+            <givenName>Institut de génétique et de biologie moléculaire et</givenName>
+            <familyName>cellulaire</familyName>
+            <nameIdentifier nameIdentifierScheme="ROR" schemeURI="https://ror.org/">https://ror.org/0015ws592</nameIdentifier>
+        </contributor>
+    </contributors>
+    <dates>
+        <date dateType="Created">2026-05-21 14:37:12.764540</date>
+        <date dateType="Updated">2026-05-21 14:38:20.986179</date>
+        <date dateType="Issued">2026-05-21 00:00:00</date>
+    </dates>
+    <resourceType resourceTypeGeneral="Dataset">Dataset</resourceType>
+    <identifier identifierType="DOI">10.83249/6BFY0I6X</identifier>
+    <relatedIdentifiers>
+        <relatedIdentifier relationType="References" relatedIdentifierType="URL">https://api.test.datacite.org/dois</relatedIdentifier>
+    </relatedIdentifiers>
+    <sizes>
+        <size>0 kb</size>
+    </sizes>
+    <formats>
+        <format>CSV</format>
+    </formats>
+    <rightsList>
+        <rights rightsURI="http://www.opendefinition.org/licenses/cc-by" rightsIdentifier="cc-by">cc-by</rights>
+    </rightsList>
+    <descriptions>
+        <description descriptionType="Abstract">kldsfkljsdf</description>
+        <description descriptionType="Methods">FAIR3R form summary
+Publication year: 2026
+Resource type: Dataset
+Creators: laurent bouri
+Contributors: bouri, laurent (Conceptualization, Data Curation, Formal Analysis); Institut de génétique et de biologie moléculaire et cellulaire
+Organisms: Mus musculus
+Strains: C57BL/6NCrl
+Genes: Apoe
+Alleles: Apoe&lt;em1(IMPC)Bay&gt;
+Gene chromosome location: 7:19430034-19433113
+Treatments: tamoxifen N-beta-D-glucosiduronic acid | protocol=acute | design=50 mg/kg, IP, 3 doses, 7 days, 1x/day, anesthesia: none, vehicle: saline 0.9%
+Chemicals: tamoxifen N-beta-D-glucosiduronic acid
+Diets: high fat diet
+Disease models: Alzheimer's disease
+Tissues / organs: brain
+Experimental interventions: Genetic Modification, Chemical / Pharmacological Treatment, Diet / Feeding Regimen, Disease Model, Tissue / Organ of Interest</description>
+    </descriptions>
+</resource>

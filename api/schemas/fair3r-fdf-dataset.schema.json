@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://fair3r.fr/schemas/datacite-dataset/3.0",
+  "title": "FAIR3R DataCite Dataset",
+  "description": "DataCite 4.x JSON schema for dataset exchange between Metadatapp and FAIR3R (validation.fair3r.fr). Aligned with the local FAIR3R wizard contract in api/schemas/fair3r-wizard.schema.json.",
+  "type": "object",
+  "required": ["titles", "creators", "publicationYear", "types"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to the FAIR3R wizard schema mirrored in api/schemas/fair3r-wizard.schema.json."
+    },
+    "identifier": {
+      "type": "string",
+      "description": "DataCite DOI (e.g. '10.1234/exp-401') or placeholder identifier.",
+      "examples": ["10.1234/exp-401", "10.0000/d4a1c823-8bde-4f9e-b9e3-1234abcd5678"]
+    },
+    "titles": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Dataset titles. First entry is the main title; additional entries may carry a titleType.",
+      "items": {
+        "type": "object",
+        "required": ["title"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1 },
+          "titleType": {
+            "type": "string",
+            "enum": ["AlternativeTitle", "Subtitle", "TranslatedTitle", "Other"]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "publicationYear": {
+      "type": "integer",
+      "minimum": 2000,
+      "maximum": 2100,
+      "description": "Year the dataset was published or created."
+    },
+    "publisher": {
+      "type": "string",
+      "description": "Publisher name (default: 'FAIR3R / Metadatapp')."
+    },
+    "types": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Resource type declarations (DataCite resourceType + resourceTypeGeneral).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "resourceType": {
+            "type": "string",
+            "enum": ["Dataset", "Collection", "Image", "Text", "Software", "PhysicalObject", "Model", "Workflow", "Other"]
+          },
+          "resourceTypeGeneral": { "type": "string" }
+        }
+      }
+    },
+    "creators": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Persons or organisations responsible for creating the dataset. Personal creators carry givenName/familyName; organisational creators carry name.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "givenName": { "type": "string" },
+          "familyName": { "type": "string" },
+          "name": {
+            "type": "string",
+            "description": "Full name for organisational creators, or 'FamilyName, GivenName' for personal ones."
+          },
+          "nameType": {
+            "type": "string",
+            "enum": ["Personal", "Organizational"]
+          },
+          "nameIdentifiers": {
+            "type": "array",
+            "description": "Persistent identifiers for the creator (e.g. ORCID, ISNI).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nameIdentifier": { "type": "string" },
+                "nameIdentifierScheme": { "type": "string", "examples": ["ORCID", "ISNI"] },
+                "schemeURI": { "type": "string", "format": "uri" }
+              }
+            }
+          },
+          "affiliation": {
+            "type": "array",
+            "description": "Creator affiliations, preferably from the ROR registry.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "affiliation": { "type": "string" },
+                "affiliationIdentifier": { "type": "string" },
+                "affiliationIdentifierScheme": { "type": "string", "examples": ["ROR"] },
+                "schemeURI": { "type": "string", "format": "uri" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "contributors": {
+      "type": "array",
+      "description": "Additional contributors with CRediT taxonomy roles.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "nameType": { "type": "string" },
+          "contributorType": { "type": "string" },
+          "contributorRoles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "contributorRole": { "type": "string" },
+                "contributorRoleURI": { "type": "string", "format": "uri" },
+                "contributorRoleScheme": { "type": "string", "examples": ["CRediT"] },
+                "contributorRoleSchemeURI": { "type": "string", "format": "uri" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "descriptions": {
+      "type": "array",
+      "description": "Textual descriptions of the dataset.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "descriptionType": {
+            "type": "string",
+            "enum": ["Abstract", "Methods", "SeriesInformation", "TableOfContents", "TechnicalInfo", "Other"]
+          }
+        }
+      }
+    },
+    "subjects": {
+      "type": "array",
+      "description": "Controlled vocabulary subjects. Metadatapp emits organism (NCBITaxon), strain (EFO), gene (GeneID), chemical (ChEBI), disease (DOID), anatomy (UBERON), and FAIR score (FAIR3R).",
+      "items": {
+        "type": "object",
+        "required": ["subject"],
+        "properties": {
+          "subject": { "type": "string" },
+          "subjectScheme": {
+            "type": "string",
+            "examples": ["NCBITaxon", "EFO", "GeneID", "ChEBI", "DOID", "UBERON", "FAIR3R"]
+          },
+          "valueURI": { "type": "string", "format": "uri" },
+          "schemeURI": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "rightsList": {
+      "type": "array",
+      "description": "License information for the dataset.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "rights": { "type": "string" },
+          "rightsURI": { "type": "string", "format": "uri" },
+          "rightsIdentifier": { "type": "string" },
+          "rightsIdentifierScheme": { "type": "string" },
+          "schemeURI": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "alternateIdentifiers": {
+      "type": "array",
+      "description": "Additional identifiers for this resource (e.g. landing page URL).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "alternateIdentifier": { "type": "string" },
+          "alternateIdentifierType": { "type": "string" }
+        }
+      }
+    },
+    "relatedIdentifiers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "relatedIdentifier": { "type": "string" },
+          "relatedIdentifierType": { "type": "string" },
+          "relationType": { "type": "string" }
+        }
+      }
+    },
+    "metadatapp_id": {
+      "type": "string",
+      "description": "Internal Metadatapp UUID for the study or investigation."
+    },
+    "metadatapp_type": {
+      "type": "string",
+      "enum": ["study", "investigation"],
+      "description": "Whether this record represents a study (Experiment) or investigation (Project)."
+    },
+    "fair_score": {
+      "type": "object",
+      "description": "FAIR compliance scores (0–100) computed by Metadatapp.",
+      "properties": {
+        "total": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "findable": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "accessible": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "interoperable": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "reusable": { "type": "integer", "minimum": 0, "maximum": 100 }
+      }
+    },
+    "fair_criteria": {
+      "type": "array",
+      "description": "Per-criterion FAIR compliance results (pass/fail) from Metadatapp.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": { "type": "string" },
+          "value": { "type": "string", "enum": ["pass", "fail"] }
+        }
+      }
+    }
+  }
+}

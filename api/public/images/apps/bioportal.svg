@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>BioPortal</title>
+  <rect width="64" height="64" rx="12" fill="#1d4ed8"/>
+  <circle cx="22" cy="22" r="7" fill="#dbeafe"/>
+  <circle cx="42" cy="22" r="7" fill="#bfdbfe"/>
+  <circle cx="32" cy="43" r="8" fill="#eff6ff"/>
+  <path d="M27 25l5 11m5-11l-5 11" stroke="#93c5fd" stroke-width="4" stroke-linecap="round"/>
+</svg>

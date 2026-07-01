@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Metadatapp</title>
+    <script>
+      // GitHub Pages does not support client-side routing natively.
+      // When a user requests a path that has no corresponding file, GitHub Pages
+      // serves this 404.html instead of index.html.
+      // We store the intended URL in sessionStorage and immediately redirect to
+      // the root so that the SPA can restore the URL and render the correct route.
+      sessionStorage.setItem('ghpages_redirect', location.href);
+      location.replace('/');
+    </script>
+  </head>
+  <body></body>
+</html>
