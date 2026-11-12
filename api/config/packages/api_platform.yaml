@@ -1,0 +1,72 @@
+api_platform:
+    title: MAPP API
+    version: 0.1.0
+    description: |
+       Metadatapp API.
+    mapping:
+        # The list of paths with files or directories where the bundle will look for additional resource files.
+        paths: [
+            '%kernel.project_dir%/src/Entity',
+            '%kernel.project_dir%/src/Enum', # KEEP IT or dashboard graphql will die
+            '%kernel.project_dir%/src/Resource',
+            '%kernel.project_dir%/src/Demo',
+            '%kernel.project_dir%/src/Zefix',
+        ]
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+    docs_formats:
+        jsonld: ['application/ld+json']
+        jsonopenapi: ['application/vnd.openapi+json']
+        html: ['text/html']
+    mercure:
+        # Enabled by default with installed symfony/mercure-bundle.
+        enabled: false
+    http_cache:
+        public: true
+#    # Good defaults for REST APIs
+    patch_formats:
+        json: ['application/merge-patch+json']
+        jsonld: ['application/ld+json']
+#        json: [ "application/merge-patch+json" ]
+#        jsonapi: [ "application/vnd.api+json" ]
+    defaults:
+        stateless: true
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']
+        extra_properties:
+            standard_put: true
+            rfc_7807_compliant_errors: true
+    eager_loading:
+        max_joins: 50
+    serializer:
+        hydra_prefix: true
+    oauth:
+        enabled: true
+        clientId: '%env(OIDC_SWAGGER_CLIENT_ID)%'
+        pkce: true
+        type: oauth2
+        flow: authorizationCode
+        tokenUrl: '%env(OIDC_SERVER_URL)%/protocol/openid-connect/token'
+        authorizationUrl: '%env(OIDC_SERVER_URL)%/protocol/openid-connect/auth'
+        scopes:
+            openid: (required) Indicates that the application intends to use OIDC to verify the user's identity
+
+services:
+    _defaults:
+        autowire: false
+        autoconfigure: false
+        public: false
+
+    # "name" is not a property, it's only a method "getName"
+    # Can't apply ApiFilter PHP attribute on method, so declare filter manually
+#    app.filter.user.admin.name:
+#        class: 'App\Doctrine\Orm\Filter\NameFilter'
+#        arguments:
+#            $managerRegistry: '@doctrine'
+#            $logger: '@logger'
+#            $nameConverter: '@?api_platform.name_converter'
+#            $properties: { name: 'ipartial' } ]
+#        tags: [ 'api_platform.filter' ]
+
+# api/config/packages/api_platform.yaml

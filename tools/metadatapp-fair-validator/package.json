@@ -1,0 +1,28 @@
+{
+  "name": "metadatapp-fair-validator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP server that audits Metadatapp FAIR² JSON-LD exports for declared-but-unused vocabularies and shallow ontology depth.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "bin": {
+    "metadatapp-fair-validator": "./dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/server.js",
+    "test": "tsx --test test/*.test.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  }
+}

@@ -1,0 +1,118 @@
+id: mnms-v1
+name: "MNMS (Minimum Metadata Schema)"
+version: "1.0"
+description: "Minimum Metadata Schema: the column-level standard. ~20 required + 2 optional CSV columns, each mapping to an ARRIVE reporting section. Conforms to ARRIVE so an MNMS-validated CSV is also scored against ARRIVE's dataset-level expectations."
+identifier: "https://w3id.org/mnms"
+conforms_to: [arrive-v2]
+ontology:
+  iri: "https://w3id.org/mnms#"
+  prefix: "mnms"
+fair_bonus:
+  dimension: R
+  max_points: 5
+source: builtin
+
+required_columns:
+  - id: subject_id
+    name_patterns: ["subject_id", "animal_id", "subject", "animal", "id"]
+    semantic_type: identifier
+    role: subject_id
+    arrive_section: "Experimental animals / Total number"
+    severity: high
+  - id: species
+    name_patterns: ["species"]
+    arrive_section: "Experimental animals / Species"
+    severity: high
+  - id: strain
+    name_patterns: ["strain", "genotype"]
+    arrive_section: "Experimental animals / Strain"
+    severity: medium
+  - id: sex
+    name_patterns: ["sex", "gender"]
+    arrive_section: "Experimental animals / Sex"
+    severity: high
+  - id: age
+    name_patterns: ["age", "birth", "dob"]
+    arrive_section: "Experimental animals / Age"
+    severity: high
+  - id: weight_start
+    name_patterns: ["weight_start", "weight", "body_weight", "bw"]
+    arrive_section: "Experimental animals / Weight"
+    unit_required: true
+    unit_column: Weight_Unit
+    severity: medium
+  - id: supplier
+    name_patterns: ["supplier", "source", "vendor"]
+    arrive_section: "Experimental animals / Source"
+    severity: low
+  - id: xp_group
+    name_patterns: ["xp_group", "group", "treatment", "arm", "condition"]
+    role: treatment
+    arrive_section: "Study design and sample size / Experimental groups incl. controls"
+    severity: high
+  - id: dvc_cage
+    name_patterns: ["dvc_cage", "cage", "cage_id"]
+    role: clustering_unit
+    arrive_section: "Study design and sample size / Experimental unit"
+    severity: medium
+  - id: dose
+    name_patterns: ["dose", "concentration"]
+    arrive_section: "Experimental procedures / Test substances"
+    unit_required: true
+    unit_column: Dose_Unit
+    severity: medium
+  - id: route
+    name_patterns: ["route", "administration"]
+    arrive_section: "Experimental procedures / Test substances"
+    severity: low
+  - id: timepoint
+    name_patterns: ["timepoint", "time", "day", "week", "session"]
+    role: time
+    arrive_section: "Experimental procedures"
+    severity: medium
+  - id: outcome
+    name_patterns: ["outcome", "measurement", "value", "result", "readout"]
+    role: outcome
+    arrive_section: "Outcome and statistics / Outcome measures"
+    unit_required: true
+    severity: high
+  - id: primary_outcome_flag
+    name_patterns: ["primary_outcome", "is_primary", "primary"]
+    arrive_section: "Outcome and statistics / Primary outcome"
+    severity: medium
+  - id: randomisation
+    name_patterns: ["randomisation", "randomization", "random", "allocation"]
+    arrive_section: "Study design and sample size / Randomisation"
+    severity: high
+  - id: blinding
+    name_patterns: ["blinding", "blinded", "blind", "masking"]
+    arrive_section: "Study design and sample size / Blinding"
+    severity: high
+  - id: inclusion_flag
+    name_patterns: ["inclusion", "included", "include"]
+    arrive_section: "Inclusion and exclusion criteria / Inclusion"
+    severity: medium
+  - id: exclusion_flag
+    name_patterns: ["exclusion", "excluded", "exclude", "dropout"]
+    arrive_section: "Inclusion and exclusion criteria / Exclusion"
+    severity: medium
+  - id: batch
+    name_patterns: ["batch", "cohort", "litter"]
+    arrive_section: "Study design and sample size / Design"
+    severity: low
+  - id: operator
+    name_patterns: ["operator", "experimenter", "performed_by", "technician"]
+    arrive_section: "Personnel / Roles"
+    severity: low
+
+optional_columns:
+  - id: humane_endpoint_flag
+    name_patterns: ["humane_endpoint", "endpoint", "euthanised", "euthanized"]
+    arrive_section: "Animal care and monitoring / Humane endpoints"
+    required: false
+    severity: low
+  - id: welfare_score
+    name_patterns: ["welfare_score", "welfare", "score", "severity"]
+    arrive_section: "Animal care and monitoring / Monitoring"
+    required: false
+    severity: low

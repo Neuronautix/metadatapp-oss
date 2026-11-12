@@ -1,0 +1,10 @@
+version: 1
+workflow: metadata_normalization
+records:
+  - id: sample-001
+    input:
+      organism: Mus musculus
+      strain: c57bl/6j
+    expected_terms:
+      organism: Mus musculus
+      strain: C57BL/6J

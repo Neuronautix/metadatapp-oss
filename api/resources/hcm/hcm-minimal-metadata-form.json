@@ -1,0 +1,612 @@
+{
+  "$comment": "Canonical, machine-readable definition of the Home Cage Monitoring (HCM) Minimal Metadata Form. Each field references a Common Data Element (CDE) object, not a standalone label. This file is the single source of truth consumed by App\\Command\\HcmMetadataFormSeedCommand to materialise CommonDataElement + CanonicalForm + CanonicalFormSection + CanonicalFormField entities. Ontology IRIs are illustrative, curated mappings; see docs/guide/metadata/hcm-minimal-metadata-form.md.",
+  "form": {
+    "key": "hcm_minimal_metadata_form",
+    "title": "HCM Minimal Metadata Form",
+    "description": "Minimal, FAIR-aligned metadata for Home Cage Monitoring (HCM) studies in preclinical research. Captures study, animal, cohort, housing, device, recording, behavioural-metric, and data-reuse metadata as reusable Common Data Elements grouped along the ISA Investigation/Study/Assay hierarchy.",
+    "domain": "home-cage-monitoring",
+    "version": "1.0.0",
+    "status": "active",
+    "isaMapping": {
+      "comment": "ISA hierarchy this form populates. Study-level sections describe the experimental subjects and conditions; Assay-level sections describe the HCM measurement and its outputs.",
+      "investigation": {
+        "study": {
+          "forms": [
+            { "section": "study", "isaForm": "Study" },
+            { "section": "animals", "isaForm": "Animal Form" },
+            { "section": "cohort", "isaForm": "Cohort Form" },
+            { "section": "housing", "isaForm": "Housing Form" },
+            { "section": "recording_protocol", "isaForm": "Protocol Form" }
+          ],
+          "assay": {
+            "forms": [
+              { "section": "hcm_device", "isaForm": "HCM Device Form" },
+              { "section": "recording_protocol", "isaForm": "Recording Form" },
+              { "section": "behavioral_metrics", "isaForm": "Behavioral Metrics Form" },
+              { "section": "data_reuse", "isaForm": "Data Export Form" }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cdeDefaults": {
+    "source": "metadatapp",
+    "status": "endorsed",
+    "version": "1.0.0"
+  },
+  "sections": [
+    {
+      "key": "study",
+      "title": "Study",
+      "description": "Top-level study identification, objectives, design, and ethical authorisation.",
+      "isaLevel": "study",
+      "isaNode": "Study",
+      "fields": [
+        {
+          "localKey": "study_identifier",
+          "label": "Study identifier",
+          "definition": "A unique identifier assigned to the HCM study.",
+          "questionText": "What is the unique identifier for this study?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.org/dc/terms/identifier", "label": "identifier", "source": "DCTERMS" }
+          ]
+        },
+        {
+          "localKey": "experimental_objective",
+          "label": "Experimental objective",
+          "definition": "The scientific objective or hypothesis the study is designed to address.",
+          "questionText": "What is the experimental objective of the study?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/OBI_0000441", "label": "objective specification", "source": "OBI" }
+          ]
+        },
+        {
+          "localKey": "experimental_design",
+          "label": "Experimental design",
+          "definition": "The overall experimental design (e.g. between-subjects, within-subjects, longitudinal, crossover).",
+          "questionText": "What experimental design was used?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/OBI_0500000", "label": "study design", "source": "OBI" }
+          ]
+        },
+        {
+          "localKey": "ethical_authorization",
+          "label": "Ethical authorization",
+          "definition": "Identifier or reference for the ethical/animal-welfare authorisation governing the study.",
+          "questionText": "What is the ethical authorisation reference for this study?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": []
+        }
+      ]
+    },
+    {
+      "key": "animals",
+      "title": "Animals",
+      "description": "Biological characteristics of the experimental animals.",
+      "isaLevel": "study",
+      "isaNode": "Animal Form",
+      "fields": [
+        {
+          "localKey": "species",
+          "label": "Species",
+          "definition": "The taxonomic species of the experimental animals.",
+          "questionText": "What species were used?",
+          "datatype": "string",
+          "required": true,
+          "permissibleValues": [
+            { "value": "Mus musculus", "ontologyTerm": "http://purl.obolibrary.org/obo/NCBITaxon_10090" },
+            { "value": "Rattus norvegicus", "ontologyTerm": "http://purl.obolibrary.org/obo/NCBITaxon_10116" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/OBI_0100026", "label": "organism", "source": "OBI" }
+          ]
+        },
+        {
+          "localKey": "strain",
+          "label": "Strain",
+          "definition": "The genetic strain or stock of the experimental animals.",
+          "questionText": "What strain was used?",
+          "datatype": "string",
+          "required": true,
+          "permissibleValues": [
+            { "value": "C57BL/6J" },
+            { "value": "BALB/c" },
+            { "value": "Wistar" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C14419", "label": "Strain", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "genotype",
+          "label": "Genotype",
+          "definition": "The genotype of the experimental animals, including any genetic modifications.",
+          "questionText": "What is the genotype of the animals?",
+          "datatype": "string",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://www.ebi.ac.uk/efo/EFO_0000513", "label": "genotype", "source": "EFO" }
+          ]
+        },
+        {
+          "localKey": "sex",
+          "label": "Sex",
+          "definition": "The biological sex of the experimental animals.",
+          "questionText": "What is the sex of the animals?",
+          "datatype": "string",
+          "required": true,
+          "permissibleValues": [
+            { "value": "male", "ontologyTerm": "http://purl.obolibrary.org/obo/PATO_0000384" },
+            { "value": "female", "ontologyTerm": "http://purl.obolibrary.org/obo/PATO_0000383" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/PATO_0000047", "label": "biological sex", "source": "PATO" }
+          ]
+        },
+        {
+          "localKey": "age_at_recording",
+          "label": "Age at recording",
+          "definition": "The age of the animals at the start of HCM recording.",
+          "questionText": "What was the age of the animals at recording?",
+          "datatype": "decimal",
+          "unitConstraint": "weeks",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/PATO_0000011", "label": "age", "source": "PATO" }
+          ]
+        },
+        {
+          "localKey": "body_weight",
+          "label": "Body weight",
+          "definition": "The body weight of the animals at the start of HCM recording.",
+          "questionText": "What was the body weight of the animals?",
+          "datatype": "decimal",
+          "unitConstraint": "g",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C81328", "label": "Body Weight", "source": "NCIT" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "cohort",
+      "title": "Cohort",
+      "description": "Cohort and batching structure, group assignment, and randomisation.",
+      "isaLevel": "study",
+      "isaNode": "Cohort Form",
+      "fields": [
+        {
+          "localKey": "cohort_id",
+          "label": "Cohort ID",
+          "definition": "Identifier for the cohort of animals studied together.",
+          "questionText": "What is the cohort identifier?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C61512", "label": "Cohort", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "batch_id",
+          "label": "Batch ID",
+          "definition": "Identifier for the experimental batch within the cohort.",
+          "questionText": "What is the batch identifier?",
+          "datatype": "string",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C67073", "label": "Batch", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "group_assignment",
+          "label": "Group assignment",
+          "definition": "The experimental group the animals were assigned to (e.g. control, treatment).",
+          "questionText": "What group were the animals assigned to?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C73464", "label": "Study Group", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "randomization_method",
+          "label": "Randomization method",
+          "definition": "The method used to randomise animals to groups.",
+          "questionText": "How were animals randomised to groups?",
+          "datatype": "string",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C25196", "label": "Randomization", "source": "NCIT" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "housing",
+      "title": "Housing",
+      "description": "Cage and environmental housing conditions during the study.",
+      "isaLevel": "study",
+      "isaNode": "Housing Form",
+      "fields": [
+        {
+          "localKey": "cage_type",
+          "label": "Cage type",
+          "definition": "The type of cage used to house the animals (e.g. IVC, open-top).",
+          "questionText": "What cage type was used?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C172264", "label": "Animal Housing", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "animals_per_cage",
+          "label": "Animals per cage",
+          "definition": "The number of animals housed per cage.",
+          "questionText": "How many animals were housed per cage?",
+          "datatype": "integer",
+          "required": true,
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "bedding",
+          "label": "Bedding",
+          "definition": "The bedding material used in the cage.",
+          "questionText": "What bedding material was used?",
+          "datatype": "string",
+          "required": false,
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "enrichment",
+          "label": "Enrichment",
+          "definition": "Environmental enrichment items provided in the cage.",
+          "questionText": "What environmental enrichment was provided?",
+          "datatype": "string",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/ENVO_01000934", "label": "environmental enrichment", "source": "ENVO" }
+          ]
+        },
+        {
+          "localKey": "light_dark_cycle",
+          "label": "Light/dark cycle",
+          "definition": "The light/dark cycle the animals were maintained under (e.g. 12:12 LD, lights-on time).",
+          "questionText": "What light/dark cycle was used?",
+          "datatype": "string",
+          "required": true,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C82379", "label": "Light Dark Cycle", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "temperature",
+          "label": "Temperature",
+          "definition": "The ambient temperature of the housing room.",
+          "questionText": "What was the ambient temperature?",
+          "datatype": "decimal",
+          "unitConstraint": "Cel",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C25206", "label": "Temperature", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "humidity",
+          "label": "Humidity",
+          "definition": "The relative humidity of the housing room.",
+          "questionText": "What was the relative humidity?",
+          "datatype": "decimal",
+          "unitConstraint": "%",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C62652", "label": "Humidity", "source": "NCIT" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "hcm_device",
+      "title": "HCM Device",
+      "description": "The Home Cage Monitoring hardware and software configuration.",
+      "isaLevel": "assay",
+      "isaNode": "HCM Device Form",
+      "fields": [
+        {
+          "localKey": "device_manufacturer",
+          "label": "Device manufacturer",
+          "definition": "The manufacturer of the HCM device.",
+          "questionText": "Who manufactured the HCM device?",
+          "datatype": "string",
+          "required": true,
+          "source": "hcmo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C25392", "label": "Manufacturer", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "device_model",
+          "label": "Device model",
+          "definition": "The model name/number of the HCM device.",
+          "questionText": "What is the HCM device model?",
+          "datatype": "string",
+          "required": true,
+          "source": "hcmo",
+          "ontologyMappings": [
+            { "label": "home cage monitoring device", "source": "HCMO" }
+          ]
+        },
+        {
+          "localKey": "sensor_type",
+          "label": "Sensor type",
+          "definition": "The type of sensor(s) used by the HCM device (e.g. RFID, capacitive, PIR, load cell).",
+          "questionText": "What sensor type does the device use?",
+          "datatype": "string",
+          "required": true,
+          "source": "hcmo",
+          "permissibleValues": [
+            { "value": "RFID" },
+            { "value": "capacitance" },
+            { "value": "passive infrared (PIR)" },
+            { "value": "load cell" },
+            { "value": "video" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C50166", "label": "Sensor Device", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "camera_configuration",
+          "label": "Camera configuration",
+          "definition": "The camera configuration used for video-based monitoring (e.g. top-down RGB, IR, resolution).",
+          "questionText": "What is the camera configuration?",
+          "datatype": "string",
+          "required": false,
+          "source": "hcmo",
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "sampling_frequency",
+          "label": "Sampling frequency",
+          "definition": "The data sampling frequency of the HCM device.",
+          "questionText": "What is the sampling frequency?",
+          "datatype": "decimal",
+          "unitConstraint": "Hz",
+          "required": true,
+          "source": "hcmo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C73408", "label": "Sampling Frequency", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "software_version",
+          "label": "Software version",
+          "definition": "The version of the HCM acquisition/analysis software.",
+          "questionText": "What software version was used?",
+          "datatype": "string",
+          "required": false,
+          "source": "hcmo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C111093", "label": "Software Version", "source": "NCIT" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "recording_protocol",
+      "title": "Recording Protocol",
+      "description": "Habituation, recording window, interventions, and disturbance events.",
+      "isaLevel": "assay",
+      "isaNode": "Recording Form",
+      "fields": [
+        {
+          "localKey": "habituation_duration",
+          "label": "Habituation duration",
+          "definition": "The duration animals were habituated to the HCM cage before recording.",
+          "questionText": "How long were animals habituated before recording?",
+          "datatype": "decimal",
+          "unitConstraint": "h",
+          "required": false,
+          "source": "hcmo",
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "recording_start_end",
+          "label": "Recording start/end",
+          "definition": "The start and end timestamps of the HCM recording window.",
+          "questionText": "When did recording start and end?",
+          "datatype": "datetime",
+          "required": true,
+          "source": "hcmo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C181317", "label": "Recording Period", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "intervention_timing",
+          "label": "Intervention timing",
+          "definition": "The timing of any interventions (e.g. treatment, surgery) relative to recording.",
+          "questionText": "When did interventions occur relative to recording?",
+          "datatype": "string",
+          "required": false,
+          "source": "hcmo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C25218", "label": "Intervention", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "cleaning_disturbance_events",
+          "label": "Cleaning/disturbance events",
+          "definition": "Recorded cage cleaning or disturbance events during the recording window.",
+          "questionText": "What cleaning or disturbance events occurred?",
+          "datatype": "string",
+          "required": false,
+          "source": "hcmo",
+          "ontologyMappings": []
+        }
+      ]
+    },
+    {
+      "key": "behavioral_metrics",
+      "title": "Behavioral Metrics",
+      "description": "Definitions of the behavioural metrics derived from HCM data.",
+      "isaLevel": "assay",
+      "isaNode": "Behavioral Metrics Form",
+      "fields": [
+        {
+          "localKey": "activity_metric_definition",
+          "label": "Activity metric definition",
+          "definition": "Definition and method for the locomotor activity metric.",
+          "questionText": "How is the activity metric defined?",
+          "datatype": "string",
+          "required": true,
+          "source": "mbo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C61345", "label": "Locomotor Activity", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "sleep_rest_definition",
+          "label": "Sleep/rest definition",
+          "definition": "Definition and method for the sleep/rest metric (e.g. immobility threshold).",
+          "questionText": "How is sleep/rest defined?",
+          "datatype": "string",
+          "required": false,
+          "source": "mbo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C94483", "label": "Sleep", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "feeding_metric_definition",
+          "label": "Feeding metric definition",
+          "definition": "Definition and method for the feeding/food-intake metric.",
+          "questionText": "How is the feeding metric defined?",
+          "datatype": "string",
+          "required": false,
+          "source": "mbo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C84444", "label": "Food Intake", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "social_proximity_definition",
+          "label": "Social proximity definition",
+          "definition": "Definition and method for the social proximity / interaction metric.",
+          "questionText": "How is social proximity defined?",
+          "datatype": "string",
+          "required": false,
+          "source": "mbo",
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C17005", "label": "Social Behavior", "source": "NCIT" }
+          ]
+        },
+        {
+          "localKey": "circadian_aggregation_method",
+          "label": "Circadian aggregation method",
+          "definition": "Method used to aggregate metrics over the circadian cycle (e.g. cosinor, hourly binning).",
+          "questionText": "How are metrics aggregated over the circadian cycle?",
+          "datatype": "string",
+          "required": false,
+          "source": "mbo",
+          "permissibleValues": [
+            { "value": "cosinor" },
+            { "value": "hourly binning" },
+            { "value": "light/dark phase averaging" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/GO_0007623", "label": "circadian rhythm", "source": "GO" }
+          ]
+        }
+      ]
+    },
+    {
+      "key": "data_reuse",
+      "title": "Data Reuse",
+      "description": "Availability, licensing, and export format of study data for FAIR reuse.",
+      "isaLevel": "assay",
+      "isaNode": "Data Export Form",
+      "fields": [
+        {
+          "localKey": "raw_data_available",
+          "label": "Raw data available?",
+          "definition": "Whether raw HCM data is available for reuse.",
+          "questionText": "Is raw data available?",
+          "datatype": "boolean",
+          "required": true,
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "processed_data_available",
+          "label": "Processed data available?",
+          "definition": "Whether processed/derived HCM data is available for reuse.",
+          "questionText": "Is processed data available?",
+          "datatype": "boolean",
+          "required": true,
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "code_available",
+          "label": "Code available?",
+          "definition": "Whether analysis code is available for reuse.",
+          "questionText": "Is analysis code available?",
+          "datatype": "boolean",
+          "required": false,
+          "ontologyMappings": []
+        },
+        {
+          "localKey": "doi",
+          "label": "DOI",
+          "definition": "The Digital Object Identifier of the dataset.",
+          "questionText": "What is the dataset DOI?",
+          "datatype": "string",
+          "required": false,
+          "ontologyMappings": [
+            { "iri": "http://purl.org/ontology/bibo/doi", "label": "doi", "source": "BIBO" }
+          ]
+        },
+        {
+          "localKey": "license",
+          "label": "License",
+          "definition": "The license under which the dataset is released.",
+          "questionText": "What license applies to the dataset?",
+          "datatype": "string",
+          "required": false,
+          "permissibleValues": [
+            { "value": "CC BY 4.0", "ontologyTerm": "https://creativecommons.org/licenses/by/4.0/" },
+            { "value": "CC0 1.0", "ontologyTerm": "https://creativecommons.org/publicdomain/zero/1.0/" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.org/dc/terms/license", "label": "license", "source": "DCTERMS" }
+          ]
+        },
+        {
+          "localKey": "export_format",
+          "label": "Export format",
+          "definition": "The export/encoding format of the released dataset.",
+          "questionText": "What export format is used?",
+          "datatype": "string",
+          "required": false,
+          "permissibleValues": [
+            { "value": "RO-Crate" },
+            { "value": "ISA-Tab" },
+            { "value": "FAIR2/Croissant JSON-LD" },
+            { "value": "CSV" }
+          ],
+          "ontologyMappings": [
+            { "iri": "http://purl.obolibrary.org/obo/NCIT_C42883", "label": "File Format", "source": "NCIT" }
+          ]
+        }
+      ]
+    }
+  ]
+}

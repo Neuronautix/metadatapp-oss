@@ -1,0 +1,163 @@
+curation:
+  Subject:
+    fields:
+      id:
+        semantic: id
+        role: resolver-only
+        datatype: uuid
+        required: false
+        aliases: [uuid, identifier, subject_id, animal_id]
+      externalId:
+        semantic: externalId
+        role: resolver-only
+        datatype: string
+        required: false
+        aliases: [external_id, subject_id, ex_id, animal_id]
+      label:
+        semantic: label
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [id, subject_id, animal_id, label, name]
+        normalizers: [trim, lowercase]
+      species:
+        semantic: species
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [animal_type, organism, subject_species]
+        vocabulary_adapter: species_enum
+      sex:
+        semantic: sex
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [gender, subject_sex]
+        vocabulary_adapter: sex_enum
+      birthAt:
+        semantic: birthAt
+        role: patchable
+        datatype: datetime
+        required: false
+        aliases: [dob, date_of_birth, birth_date, subject_birth_date]
+      startAt:
+        semantic: startAt
+        role: patchable
+        datatype: datetime
+        required: false
+        aliases: [start_date, entry_date]
+      strain:
+        semantic: strain
+        role: patchable
+        datatype: string
+        required: false
+        aliases: [line, background, subject_strain]
+        vocabulary_adapter: strain_catalog
+      genotype:
+        semantic: genotype
+        role: patchable
+        datatype: string
+        required: false
+        aliases: [zygosity, allele, subject_genotype]
+      weight:
+        semantic: weight
+        role: patchable
+        datatype: float
+        required: false
+        aliases: [body_weight, mass, subject_weight]
+      healthStatus:
+        semantic: healthStatus
+        role: patchable
+        datatype: string
+        required: false
+        aliases: [health_status, condition, health, subject_health]
+      isPregnant:
+        semantic: isPregnant
+        role: patchable
+        datatype: boolean
+        required: false
+        aliases: [pregnant, pregnancy, subject_pregnant]
+        normalizers: [boolean]
+
+  Sample:
+    fields:
+      id:
+        semantic: id
+        role: resolver-only
+        datatype: uuid
+        required: false
+        aliases: [uuid, identifier, sample_id]
+      label:
+        semantic: label
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [sample_id, name, label]
+      type:
+        semantic: type
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [sample_type, specimen_type]
+      collectedAt:
+        semantic: collectedAt
+        role: patchable
+        datatype: datetime
+        required: false
+        aliases: [collection_date, date_collected]
+      derivedFrom:
+        semantic: derivedFrom
+        role: resolver-only
+        datatype: uuid
+        required: false
+        aliases: [parent_sample, source_sample]
+
+  Cage:
+    fields:
+      id:
+        semantic: id
+        role: resolver-only
+        datatype: uuid
+        required: false
+        aliases: [uuid, identifier, cage_id]
+      label:
+        semantic: label
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [cage_id, cage_label]
+      room:
+        semantic: room
+        role: patchable
+        datatype: string
+        required: true
+        aliases: [location, room_number]
+      rack:
+        semantic: rack
+        role: patchable
+        datatype: string
+        required: false
+        aliases: [rack_number, position]
+
+vocabulary_adapters:
+  sex_enum:
+    type: enum
+    class: App\Enum\Sex
+    synonyms:
+      m: male
+      f: female
+  species_enum:
+    type: enum
+    class: App\Enum\Species
+    synonyms:
+      mus musculus: mouse
+      mouse: mouse
+      rat: rat
+  strain_catalog:
+    type: entity
+    class: App\Entity\Strain
+    repository: App\Repository\StrainRepository
+  subject_by_id:
+    type: entity
+    class: App\Entity\Subject
+    repository: App\Repository\SubjectRepository

@@ -1,0 +1,18 @@
+version: 1
+name: curation-governance-policy
+rules:
+  provider_access:
+    description: Business code must call the AI gateway interface, not provider SDKs.
+    required: true
+  structured_outputs:
+    description: Curation tasks must emit structured patch proposals.
+    required: true
+  provenance:
+    description: Every suggested edit must include provenance or evidence references.
+    required: true
+  human_approval:
+    description: Write-back requires human approval.
+    required: true
+  fail_closed:
+    description: Missing validation, approval, or confidence data blocks execution.
+    required: true

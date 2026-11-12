@@ -1,0 +1,99 @@
+{
+  "$schema": "https://w3id.org/repo-declarations/v1",
+  "spec_version": 2,
+  "generator": "scripts/generate-declarations.py",
+  "project": {
+    "name": "Metadatapp",
+    "repository": "https://github.com/Neuronautix/metadatapp",
+    "license": "AGPL-3.0-or-later"
+  },
+  "declarations": [
+    {
+      "declaration": "ai-declaration",
+      "title": "AI Declaration",
+      "path": "AI-declaration.md",
+      "applies_when": "repository uses AI (agents, prompts, models, or MCP)",
+      "managed": true,
+      "evidence": [
+        ".claude",
+        ".github/copilot-instructions.md",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "api/config/packages/ai.yaml",
+        "docs/architecture/ai-foundation.md",
+        "evals",
+        "policies/ai",
+        "prompts"
+      ],
+      "content_sha256": "b54f9b08645e160d4d7efcfefc737476ed147884302a5cb211d5e4aaca01ef08"
+    },
+    {
+      "declaration": "fair",
+      "title": "FAIR Declaration",
+      "path": "FAIR.md",
+      "applies_when": "repository manages or describes research data",
+      "managed": true,
+      "evidence": [
+        "api/tests/Fixtures/eln/ro-crate-metadata.json",
+        "doc/wiki/features/fair-checking.md",
+        "doc/wiki/features/metadata-standards.md",
+        "routers/mapp-context.jsonld",
+        "scripts/assemble-ro-crate.py",
+        "templates/ro-crate-metadata.jsonld.tpl"
+      ],
+      "content_sha256": "a7c1ccdb40c726597b686ed2552ec43c5dc7d80208544061fda4a9058631e854"
+    },
+    {
+      "declaration": "trust",
+      "title": "TRUST Declaration",
+      "path": "TRUST.md",
+      "applies_when": "repository performs AI knowledge management (MCP/RAG, prompt/eval corpora, governed knowledge base)",
+      "managed": true,
+      "evidence": [
+        "api/config/packages/ai.yaml",
+        "doc/wiki/decisions/ai-mcp-read-only.md",
+        "doc/wiki/features/ai-mcp.md",
+        "evals",
+        "prompts"
+      ],
+      "content_sha256": "4c79b43af6d9604a1318063391c397eabc898e0c59ee08de3d5203fd46403c74"
+    },
+    {
+      "declaration": "design",
+      "title": "Design Declaration",
+      "path": "design.md",
+      "applies_when": "repository ships a frontend / design system",
+      "managed": false,
+      "evidence": [
+        "design.md",
+        "osoma",
+        "osoma/src/app/App.tsx"
+      ],
+      "content_sha256": "afd67f562c62e2f1985b9df11e53d0fa507c1008afe41a4210aac162b33c75bd"
+    },
+    {
+      "declaration": "citation",
+      "title": "Citation metadata",
+      "path": "CITATION.cff",
+      "applies_when": "repository is citable software",
+      "managed": true,
+      "evidence": [
+        "LICENSE",
+        "README.md"
+      ],
+      "content_sha256": "0ed61c13aec1fc919b3b1e7ff42d3c33b3a931d7f24fbaea85ab43479992d3c3"
+    },
+    {
+      "declaration": "codemeta",
+      "title": "CodeMeta software metadata",
+      "path": "codemeta.json",
+      "applies_when": "repository is software with FAIR metadata",
+      "managed": true,
+      "evidence": [
+        "LICENSE",
+        "README.md"
+      ],
+      "content_sha256": "fae09bd6dc05d785b3795dee64838dc69301b3ec74d2e034fa22e4644cab6abc"
+    }
+  ]
+}

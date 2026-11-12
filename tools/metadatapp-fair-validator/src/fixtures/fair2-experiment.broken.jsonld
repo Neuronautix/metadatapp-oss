@@ -1,0 +1,44 @@
+{
+  "@context": {
+    "schema": "https://schema.org/",
+    "bioschemas": "https://bioschemas.org/",
+    "obi": "http://purl.obolibrary.org/obo/OBI_",
+    "qudt": "http://qudt.org/schema/qudt/",
+    "unit": "http://qudt.org/vocab/unit/",
+    "ncbitaxon": "http://purl.obolibrary.org/obo/NCBITaxon_",
+    "mgi": "http://www.informatics.jax.org/marker/MGI:",
+    "pato": "http://purl.obolibrary.org/obo/PATO_",
+    "prov": "http://www.w3.org/ns/prov#",
+    "dcterms": "http://purl.org/dc/terms/"
+  },
+  "@graph": [
+    {
+      "@id": "https://metadatapp.example/study/study-002",
+      "@type": "bioschemas:Study",
+      "schema:name": "Shank3 KO open-field behaviour (cosmetic FAIR)",
+      "schema:creator": {
+        "@type": "schema:Person",
+        "@id": "0000-0002-1825-NOT-AN-ORCID",
+        "schema:name": "A. Researcher"
+      },
+      "dcterms:license": "CC-BY-4.0"
+    },
+    {
+      "@id": "https://metadatapp.example/subject/m-002",
+      "@type": "bioschemas:BioSample",
+      "schema:name": "M002",
+      "schema:gender": "Male",
+      "bioschemas:genotype": "Shank3 KO"
+    },
+    {
+      "@id": "https://metadatapp.example/measurement/weight-002",
+      "@type": "schema:Thing",
+      "schema:value": 23.4
+    },
+    {
+      "@id": "https://metadatapp.example/procedure/surgery-002",
+      "@type": "schema:Thing",
+      "schema:name": "Stereotaxic injection of Diazepam"
+    }
+  ]
+}

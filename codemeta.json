@@ -1,0 +1,38 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "Metadatapp",
+  "description": "Open-source FAIR-by-design metadata management platform for biomedical and preclinical research, combining a Symfony/API Platform backend, the Osoma React frontend, and server-side integrations with external laboratory systems.",
+  "license": "https://spdx.org/licenses/AGPL-3.0-or-later",
+  "codeRepository": "https://github.com/Neuronautix/metadatapp",
+  "url": "https://www.metadatapp.net",
+  "keywords": [
+    "FAIR",
+    "research-data-management",
+    "metadata",
+    "RO-Crate",
+    "JSON-LD",
+    "biomedical",
+    "ontology"
+  ],
+  "programmingLanguage": [
+    "PHP",
+    "TypeScript",
+    "Python"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Damien",
+      "familyName": "Huzard",
+      "affiliation": {
+        "@type": "Organization",
+        "name": "Neuronautix"
+      }
+    }
+  ],
+  "maintainer": {
+    "@type": "Organization",
+    "name": "Neuronautix"
+  }
+}

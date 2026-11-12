@@ -1,0 +1,8 @@
+# Documentation toolchain for the Metadatapp User & Integration Guide.
+# Pinned to majors so ReadTheDocs and CI build reproducibly; bump intentionally.
+sphinx~=8.1
+myst-parser~=4.0
+furo~=2024.8
+sphinx-design~=0.6
+sphinxcontrib-mermaid~=1.0
+linkify-it-py~=2.0

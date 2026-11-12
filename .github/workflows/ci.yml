@@ -1,0 +1,130 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_call:
+
+permissions:
+    contents: read
+    packages: read
+
+env:
+    CASTOR_CONTEXT: ci
+    COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+
+jobs:
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: "Validate AI foundation structure"
+        run: |
+          for file in \
+            AGENTS.md \
+            api/README.md \
+            docs/architecture/ai-foundation.md \
+            docs/architecture/ai-pipeline.md \
+            docs/architecture/ai-decision-records/0001-ai-module-boundaries.md \
+            docs/architecture/ai-decision-records/0002-human-reviewed-writeback.md \
+            api/config/packages/ai.yaml \
+            prompts/system/metadata-curation-assistant.v1.md \
+            prompts/tasks/metadata-normalization.v1.md \
+            policies/ai/curation-governance-policy.yaml \
+            evals/cases/metadata-normalization-smoke.yaml; do
+            if [ ! -s "$file" ]; then
+              echo "::error file=$file::Missing required AI foundation doc"
+              exit 1
+            fi
+          done
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+
+      - name: Log in to registry
+        # Skip on forked PRs — the GITHUB_TOKEN minted for forks is read-only,
+        # and public images don't require auth to pull.
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: setup-castor
+        uses: castor-php/setup-castor@v1.0.0
+
+      - name: "Lint agent documentation"
+        run: castor qa:agent-docs
+
+      - name: "Install Osoma frontend dependencies"
+        working-directory: osoma
+        run: |
+          rm -rf "$(pnpm store path)"
+          rm -rf node_modules
+          pnpm install --frozen-lockfile --force
+
+      - name: "Verify Rollup can load on Linux"
+        working-directory: osoma
+        run: |
+          pnpm exec vite --version || pnpm install --frozen-lockfile --force
+          pnpm exec vite --version
+
+      - name: "Check generated DVC proxy types are up to date"
+        working-directory: osoma
+        run: |
+          pnpm run openapi:types:dvc-proxy
+          git diff --exit-code -- src/domain/dvc/dvc-proxy.generated.ts
+
+      - name: "Osoma: Build"
+        run: "castor qa:osoma:build"
+
+      - name: "Run Osoma frontend integration tests"
+        working-directory: osoma
+        run: pnpm run test:integration
+
+      - name: "Build and start the infrastructure"
+        run: "castor start"
+
+      - name: "Load fixtures"
+        run: "castor fixture"
+
+      - name: "Prepare PHPUnit test database"
+        run: |
+          docker compose -p metadatapp --profile default -f "${{ github.workspace }}/infrastructure/docker/docker-compose.yml" exec -T api sh -lc 'cd /var/www/api && bin/console -e test doctrine:database:create --if-not-exists && bin/console -e test doctrine:migrations:migrate -n --allow-no-migration --all-or-nothing && bin/console cache:clear --env=test'
+
+      - name: "Run PHP Unit tests"
+        run: "castor phpunit"
+
+      - name: "Run PHPStan"
+        run: "castor qa:phpstan"
+
+      - name: "Check PHP coding standards"
+        run: "castor qa:cs --dry-run"
+
+      - name: "Check Doctrine schema is up to date"
+        run: "castor schema-validate"
+
+      - name: Cache repository
+        uses: actions/cache@v5
+        if: github.ref == 'refs/heads/main'
+        with:
+          key: repository-${{ github.sha }}
+          path: ./

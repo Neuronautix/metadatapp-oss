@@ -1,0 +1,16 @@
+# Global Fallback
+*       @dhuzard
+
+# GitHub Actions & Automation
+/.github/           @dhuzard
+
+# CI/CD Infrastructure
+/infrastructure/    @dhuzard
+/.castor/           @dhuzard
+castor.php          @dhuzard
+
+# Backend PHP App
+/api/               @dhuzard
+
+# Frontend JavaScript Apps
+/osoma/             @dhuzard

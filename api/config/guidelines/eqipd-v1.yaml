@@ -1,0 +1,103 @@
+id: eqipd-v1
+name: "EQIPD Quality System"
+version: "1.0"
+description: "EQIPD Quality System (Vollert et al. 2024): 18 Core Requirements across 7 categories. Standalone (no conforms_to); reaches other standards only through crosswalks. Each field carries the verbatim Core Requirement + a drafting hint."
+identifier: "https://quality-preclinical-data.eu"
+conforms_to: []
+ontology:
+  iri: "https://w3id.org/eqipd#"
+  prefix: "eqipd"
+fair_bonus:
+  dimension: R
+  max_points: 5
+source: builtin
+
+required_metadata:
+  # Research team
+  - id: eqipd_process_owner
+    eqipd_section: "Research team"
+    guidance: "CR1: A process owner is designated for the quality system. Name the person accountable for maintaining and improving the unit's quality processes."
+    severity: medium
+  - id: eqipd_communication_process
+    eqipd_section: "Research team"
+    guidance: "CR2: A communication process is established within the research team. Describe how quality-relevant information is shared across the team."
+    severity: low
+
+  # Quality culture
+  - id: eqipd_quality_objectives
+    eqipd_section: "Quality culture"
+    guidance: "CR3: Quality objectives are defined. State the unit's measurable quality objectives and how they are reviewed."
+    severity: medium
+  - id: eqipd_legislation_compliance
+    eqipd_section: "Quality culture"
+    guidance: "CR4: Compliance with applicable legislation and regulations is assured. Describe how regulatory and ethical compliance is documented."
+    crosswalk: [ethics_statement, prepare_legislation_compliance]
+    severity: high
+  - id: eqipd_misconduct_procedure
+    eqipd_section: "Quality culture"
+    guidance: "CR5: A procedure for handling scientific misconduct exists. Describe how suspected misconduct is reported and investigated."
+    severity: medium
+
+  # Data integrity
+  - id: eqipd_data_documentation
+    eqipd_section: "Data integrity"
+    guidance: "CR6: Data records are documented contemporaneously and attributably. Describe the data-record documentation practices."
+    severity: high
+  - id: eqipd_storage_security
+    eqipd_section: "Data integrity"
+    guidance: "CR7: Data storage is secure and backed up. Describe storage, access control and backup procedures."
+    severity: medium
+  - id: eqipd_outcome_traceability
+    eqipd_section: "Data integrity"
+    guidance: "CR8: Outcomes are traceable from raw data to reported result. Describe the traceability chain."
+    severity: medium
+  - id: eqipd_repetition_disclosure
+    eqipd_section: "Data integrity"
+    guidance: "CR9: Repetitions and re-analyses are disclosed. Describe how repeated experiments and re-analyses are recorded and reported."
+    severity: medium
+
+  # Research processes
+  - id: eqipd_knowledge_claim_declaration
+    eqipd_section: "Research processes"
+    guidance: "CR10: Each study declares whether it is exploratory or confirmatory. State the knowledge-claim type before data collection."
+    crosswalk: [prepare_clear_hypothesis]
+    severity: medium
+  - id: eqipd_personnel_training
+    eqipd_section: "Research processes"
+    guidance: "CR11: Personnel are trained and their competence documented. Describe training and competence records."
+    crosswalk: [personnel_training, prepare_staff_competence]
+    severity: high
+  - id: eqipd_protocols_available
+    eqipd_section: "Research processes"
+    guidance: "CR12: Protocols/SOPs are available and followed. Confirm protocols are version-controlled and accessible."
+    crosswalk: [procedures_description]
+    severity: medium
+  - id: eqipd_sample_handling
+    eqipd_section: "Research processes"
+    guidance: "CR13: Samples and materials are handled and labelled to preserve integrity. Describe sample/material handling."
+    severity: medium
+  - id: eqipd_equipment_suitability
+    eqipd_section: "Research processes"
+    guidance: "CR14: Equipment is suitable, calibrated and maintained. Describe equipment qualification and maintenance."
+    severity: medium
+
+  # Continuous improvement
+  - id: eqipd_risk_assessment
+    eqipd_section: "Continuous improvement"
+    guidance: "CR15: Risks to data quality are assessed and mitigated. Describe the risk-assessment process."
+    crosswalk: [prepare_risk_assessment]
+    severity: medium
+  - id: eqipd_incident_management
+    eqipd_section: "Continuous improvement"
+    guidance: "CR16: Incidents and deviations are managed. Describe how deviations are recorded and corrected."
+    severity: medium
+  - id: eqipd_performance_monitoring
+    eqipd_section: "Continuous improvement"
+    guidance: "CR17: Performance is monitored against quality objectives. Describe the monitoring and review cycle."
+    severity: low
+
+  # Sustainability
+  - id: eqipd_sustaining_resources
+    eqipd_section: "Sustainability"
+    guidance: "CR18: Resources sustaining the quality system are secured. Describe how the quality system is resourced over time."
+    severity: low

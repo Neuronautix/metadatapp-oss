@@ -1,0 +1,22 @@
+services:
+  workspace:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+    init: true
+    command: sleep infinity
+    working_dir: /workspaces/metadatapp
+    sysctls:
+      net.ipv6.conf.all.disable_ipv6: "1"
+      net.ipv6.conf.default.disable_ipv6: "1"
+      net.ipv6.conf.lo.disable_ipv6: "1"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    volumes:
+      - ..:/workspaces/metadatapp:cached
+      - /var/run/docker.sock:/var/run/docker.sock
+      - workspace-home:/home/vscode
+
+volumes:
+  workspace-home: {}

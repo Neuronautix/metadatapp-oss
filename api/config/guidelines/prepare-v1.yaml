@@ -1,0 +1,270 @@
+id: prepare-v1
+name: "PREPARE"
+version: "1.0"
+description: "PREPARE pre-study planning checklist (Smith et al. 2018, Norecopa): 42 sub-items across 15 topics. Each item carries a one-line planning prompt; ~26 cross-walk to ARRIVE reporting fields."
+identifier: "https://norecopa.no/prepare"
+conforms_to: []
+ontology:
+  iri: "https://w3id.org/prepare#"
+  prefix: "prepare"
+fair_bonus:
+  dimension: R
+  max_points: 5
+source: builtin
+
+required_metadata:
+  # (A) Formulation of the study
+  # 1. Literature searches
+  - id: prepare_literature_searches
+    prepare_section: "1. Literature searches"
+    prompt: "Plan the literature searches and systematic review approach that justify this study."
+    severity: medium
+  - id: prepare_clear_hypothesis
+    prepare_section: "1. Literature searches"
+    arrive_section: "Outcome and statistics / Primary outcome"
+    prompt: "State the clear, testable hypothesis and the primary outcome it predicts."
+    crosswalk: [outcome_measures, primary_outcome]
+    severity: high
+
+  - id: prepare_background_rationale
+    prepare_section: "1. Literature searches"
+    arrive_section: "Study details"
+    prompt: "Summarise the scientific background and rationale that motivate the study."
+    crosswalk: [study_objectives]
+    severity: low
+
+  # 2. Legal issues
+  - id: prepare_legislation_compliance
+    prepare_section: "2. Legal issues"
+    arrive_section: "Study details"
+    prompt: "Plan how the study complies with relevant legislation and which authorisations/licences are required."
+    crosswalk: [protocol_numbers, project_licence]
+    severity: high
+  - id: prepare_permits_authorisations
+    prepare_section: "2. Legal issues"
+    prompt: "List the permits and approvals to obtain before the study starts."
+    severity: medium
+
+  # 3. Ethical issues, harm-benefit assessment and humane endpoints
+  - id: prepare_harm_benefit
+    prepare_section: "3. Ethical issues, harm-benefit assessment and humane endpoints"
+    prompt: "Document the harm-benefit assessment and the 3Rs considerations for the planned work."
+    severity: medium
+  - id: prepare_severity_classification
+    prepare_section: "3. Ethical issues, harm-benefit assessment and humane endpoints"
+    arrive_section: "Animal care and monitoring / Severity"
+    prompt: "Classify the expected severity of each procedure (sub-threshold, mild, moderate, severe)."
+    crosswalk: [severity_classification]
+    severity: medium
+  - id: prepare_humane_endpoints
+    prepare_section: "3. Ethical issues, harm-benefit assessment and humane endpoints"
+    arrive_section: "Animal care and monitoring / Humane endpoints"
+    prompt: "Define the humane endpoints and the criteria that trigger them."
+    crosswalk: [humane_endpoints]
+    severity: high
+
+  # 4. Experimental design and statistical analysis
+  - id: prepare_experimental_design
+    prepare_section: "4. Experimental design and statistical analysis"
+    prompt: "Describe the planned experimental design, factors, and group structure."
+    severity: medium
+  - id: prepare_pilot_power_significance
+    prepare_section: "4. Experimental design and statistical analysis"
+    arrive_section: "Study design and sample size / Sample-size justification"
+    prompt: "Plan pilot work, the power analysis, significance level and the sample size it yields."
+    crosswalk: [sample_size_justification, sample_size_per_group, analysis_plan]
+    severity: high
+  - id: prepare_experimental_unit
+    prepare_section: "4. Experimental design and statistical analysis"
+    arrive_section: "Study design and sample size / Experimental unit"
+    prompt: "Define the experimental unit and the total number of units planned."
+    crosswalk: [experimental_unit, total_n]
+    severity: high
+  - id: prepare_randomisation_blinding_criteria
+    prepare_section: "4. Experimental design and statistical analysis"
+    arrive_section: "Randomisation and blinding / Randomisation"
+    prompt: "Plan randomisation, blinding, and the inclusion/exclusion criteria that control bias."
+    crosswalk: [randomisation_method, blinding_strategy, inclusion_criteria, exclusion_criteria]
+    severity: high
+
+  # (B) Dialogue between scientists and the animal facility
+  # 5. Objectives and timescale, funding and division of labour
+  - id: prepare_objectives_timescale
+    prepare_section: "5. Objectives and timescale, funding and division of labour"
+    arrive_section: "Study details"
+    prompt: "Agree objectives, the timescale, and the division of labour with the facility."
+    crosswalk: [study_objectives]
+    severity: low
+  - id: prepare_funding
+    prepare_section: "5. Objectives and timescale, funding and division of labour"
+    arrive_section: "Study details"
+    prompt: "Confirm the funding sources and budget for the planned work."
+    crosswalk: [funding_sources]
+    severity: low
+
+  # 6. Facility evaluation
+  - id: prepare_facility_evaluation
+    prepare_section: "6. Facility evaluation"
+    prompt: "Evaluate that the facility can house and support the planned model and procedures."
+    severity: low
+  - id: prepare_facility_capacity
+    prepare_section: "6. Facility evaluation"
+    prompt: "Confirm cage/room capacity and equipment availability for the study period."
+    severity: low
+
+  # 7. Education and training
+  - id: prepare_staff_competence
+    prepare_section: "7. Education and training"
+    arrive_section: "Personnel / Training"
+    prompt: "Confirm that all personnel are trained and competent for their assigned procedures."
+    crosswalk: [personnel_training]
+    severity: medium
+  - id: prepare_training_records
+    prepare_section: "7. Education and training"
+    prompt: "Plan how training records and competence assessments are documented."
+    severity: low
+
+  # 8. Health risks, waste disposal and decontamination
+  - id: prepare_risk_assessment
+    prepare_section: "8. Health risks, waste disposal and decontamination"
+    arrive_section: "Risk assessment / Personnel risks"
+    prompt: "Complete the health-and-safety risk assessment and emergency procedures."
+    crosswalk: [personnel_risks, emergency_procedures]
+    severity: medium
+  - id: prepare_waste_decontamination
+    prepare_section: "8. Health risks, waste disposal and decontamination"
+    arrive_section: "Risk assessment / Waste disposal"
+    prompt: "Plan waste disposal and decontamination procedures."
+    crosswalk: [waste_disposal]
+    severity: low
+
+  # (C) Quality control of the components in the study
+  # 9. Test substances and procedures
+  - id: prepare_test_substances
+    prepare_section: "9. Test substances and procedures"
+    arrive_section: "Experimental procedures / Test substances"
+    prompt: "Specify the test substances, vehicles, doses and routes to be used."
+    crosswalk: [test_substances]
+    severity: low
+  - id: prepare_refined_substance_anaesthesia
+    prepare_section: "9. Test substances and procedures"
+    arrive_section: "Experimental procedures / Anaesthesia"
+    prompt: "Plan refined administration, anaesthesia, analgesia and surgical refinement."
+    crosswalk: [anaesthesia, analgesia, surgical_procedures]
+    severity: medium
+  - id: prepare_procedure_validation
+    prepare_section: "9. Test substances and procedures"
+    arrive_section: "Experimental procedures"
+    prompt: "Confirm that procedures and assays are validated before the study."
+    crosswalk: [procedures_description]
+    severity: low
+
+  # 10. Experimental animals
+  - id: prepare_animal_characteristics
+    prepare_section: "10. Experimental animals"
+    arrive_section: "Experimental animals / Species"
+    prompt: "Specify the species, strain, sex, age, weight and supplier of the animals."
+    crosswalk: [species, strain, sex, age, weight, supplier]
+    severity: high
+  - id: prepare_animal_numbers
+    prepare_section: "10. Experimental animals"
+    arrive_section: "Experimental animals / Total number"
+    prompt: "State the total number of animals to be ordered, including spares."
+    crosswalk: [total_n]
+    severity: medium
+  - id: prepare_genetic_background
+    prepare_section: "10. Experimental animals"
+    arrive_section: "Experimental animals / Genetic modification"
+    prompt: "Document the genetic background or modification of the animals."
+    crosswalk: [genetic_modification]
+    severity: low
+
+  # 11. Quarantine and health monitoring
+  - id: prepare_quarantine
+    prepare_section: "11. Quarantine and health monitoring"
+    prompt: "Plan quarantine and acclimatisation before procedures begin."
+    severity: low
+  - id: prepare_health_monitoring
+    prepare_section: "11. Quarantine and health monitoring"
+    arrive_section: "Animal care and monitoring / Monitoring"
+    prompt: "Plan the health-monitoring and microbiological screening programme."
+    crosswalk: [welfare_monitoring]
+    severity: low
+
+  # 12. Housing and husbandry
+  - id: prepare_housing_husbandry
+    prepare_section: "12. Housing and husbandry"
+    arrive_section: "Animal care and monitoring / Housing and husbandry"
+    prompt: "Plan housing, husbandry, enrichment and group size."
+    crosswalk: [housing_husbandry]
+    severity: medium
+  - id: prepare_environmental_conditions
+    prepare_section: "12. Housing and husbandry"
+    arrive_section: "Animal care and monitoring / Housing and husbandry"
+    prompt: "Specify temperature, humidity, light cycle and other environmental conditions."
+    crosswalk: [housing_husbandry]
+    severity: low
+  - id: prepare_acclimatisation
+    prepare_section: "12. Housing and husbandry"
+    prompt: "Plan acclimatisation to housing and handling before procedures."
+    severity: low
+
+  # 13. Experimental procedures
+  - id: prepare_procedures_plan
+    prepare_section: "13. Experimental procedures"
+    arrive_section: "Experimental procedures"
+    prompt: "Describe each experimental procedure, who performs it, when and where."
+    crosswalk: [procedures_description]
+    severity: medium
+  - id: prepare_welfare_monitoring
+    prepare_section: "13. Experimental procedures"
+    arrive_section: "Animal care and monitoring / Monitoring"
+    prompt: "Plan welfare monitoring and scoring during procedures."
+    crosswalk: [welfare_monitoring]
+    severity: medium
+  - id: prepare_data_recording
+    prepare_section: "13. Experimental procedures"
+    prompt: "Plan how procedural data and observations are recorded."
+    severity: low
+  - id: prepare_outcome_measures
+    prepare_section: "13. Experimental procedures"
+    arrive_section: "Outcome and statistics / Outcome measures"
+    prompt: "Define the outcome measures to be collected during procedures."
+    crosswalk: [outcome_measures]
+    severity: medium
+
+  # 14. Humane killing, release, reuse or rehoming
+  - id: prepare_humane_killing
+    prepare_section: "14. Humane killing, release, reuse or rehoming"
+    prompt: "Plan the method of humane killing, release, reuse or rehoming and confirmation of death."
+    severity: medium
+  - id: prepare_reuse_rehoming
+    prepare_section: "14. Humane killing, release, reuse or rehoming"
+    prompt: "Decide whether animals will be reused or rehomed and the criteria for it."
+    severity: low
+  - id: prepare_killing_confirmation
+    prepare_section: "14. Humane killing, release, reuse or rehoming"
+    arrive_section: "Animal care and monitoring / Humane endpoints"
+    prompt: "Plan how death is confirmed and recorded for each animal."
+    crosswalk: [humane_endpoints]
+    severity: low
+
+  # 15. Necropsy
+  - id: prepare_necropsy_plan
+    prepare_section: "15. Necropsy"
+    prompt: "Plan the necropsy protocol and the tissues to be collected."
+    severity: low
+  - id: prepare_sample_collection
+    prepare_section: "15. Necropsy"
+    prompt: "Plan sample collection, labelling and storage at necropsy."
+    severity: low
+  - id: prepare_necropsy_records
+    prepare_section: "15. Necropsy"
+    prompt: "Plan how necropsy findings are documented."
+    severity: low
+  - id: prepare_necropsy_procedures
+    prepare_section: "15. Necropsy"
+    arrive_section: "Experimental procedures"
+    prompt: "Describe the necropsy procedure and who performs it."
+    crosswalk: [procedures_description]
+    severity: low

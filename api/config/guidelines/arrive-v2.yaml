@@ -1,0 +1,187 @@
+id: arrive-v2
+name: "ARRIVE 2.0"
+version: "2.0"
+description: "ARRIVE 2.0 reporting guidelines (Essential 10 + Recommended Set) as dataset-level metadata fields, grouped by reporting section."
+identifier: "https://arriveguidelines.org"
+conforms_to: []
+ontology:
+  iri: "https://w3id.org/arrive#"
+  prefix: "arrive"
+fair_bonus:
+  dimension: R
+  max_points: 5
+source: builtin
+
+required_metadata:
+  # --- Study details ---
+  - id: study_title
+    arrive_section: "Study details"
+    severity: high
+  - id: study_objectives
+    arrive_section: "Study details"
+    severity: medium
+  - id: ethics_statement
+    arrive_section: "Study details"
+    severity: medium
+  - id: protocol_numbers
+    arrive_section: "Study details"
+    severity: medium
+  - id: project_licence
+    arrive_section: "Study details"
+    severity: medium
+  - id: funding_sources
+    arrive_section: "Study details"
+    severity: low
+  - id: conflicts_of_interest
+    arrive_section: "Study details"
+    severity: low
+  - id: protocol_registration
+    arrive_section: "Study details"
+    severity: low
+
+  # --- Experimental animals ---
+  - id: species
+    arrive_section: "Experimental animals / Species"
+    severity: high
+  - id: strain
+    arrive_section: "Experimental animals / Strain"
+    severity: medium
+  - id: sex
+    arrive_section: "Experimental animals / Sex"
+    severity: high
+  - id: age
+    arrive_section: "Experimental animals / Age"
+    severity: high
+  - id: weight
+    arrive_section: "Experimental animals / Weight"
+    severity: medium
+  - id: supplier
+    arrive_section: "Experimental animals / Source"
+    severity: low
+  - id: total_n
+    arrive_section: "Experimental animals / Total number"
+    severity: high
+  - id: genetic_modification
+    arrive_section: "Experimental animals / Genetic modification"
+    severity: low
+
+  # --- Experimental procedures ---
+  - id: procedures_description
+    arrive_section: "Experimental procedures"
+    severity: medium
+  - id: surgical_procedures
+    arrive_section: "Experimental procedures / Surgery"
+    severity: medium
+  - id: anaesthesia
+    arrive_section: "Experimental procedures / Anaesthesia"
+    severity: medium
+  - id: analgesia
+    arrive_section: "Experimental procedures / Analgesia"
+    severity: medium
+  - id: test_substances
+    arrive_section: "Experimental procedures / Test substances"
+    severity: low
+  - id: experimental_groups
+    arrive_section: "Study design and sample size / Experimental groups incl. controls"
+    severity: high
+
+  # --- Animal care & monitoring ---
+  - id: housing_husbandry
+    arrive_section: "Animal care and monitoring / Housing and husbandry"
+    severity: medium
+  - id: humane_endpoints
+    arrive_section: "Animal care and monitoring / Humane endpoints"
+    severity: high
+  - id: severity_classification
+    arrive_section: "Animal care and monitoring / Severity"
+    severity: medium
+  - id: welfare_monitoring
+    arrive_section: "Animal care and monitoring / Monitoring"
+    severity: medium
+  - id: adverse_events
+    arrive_section: "Animal care and monitoring / Adverse events"
+    severity: low
+  - id: pain_distress_mitigation
+    arrive_section: "Animal care and monitoring / Pain mitigation"
+    severity: medium
+
+  # --- Study design & sample size ---
+  - id: study_design
+    arrive_section: "Study design and sample size / Design"
+    severity: medium
+  - id: experimental_unit
+    arrive_section: "Study design and sample size / Experimental unit"
+    severity: high
+  - id: sample_size_justification
+    arrive_section: "Study design and sample size / Sample-size justification"
+    severity: high
+  - id: sample_size_per_group
+    arrive_section: "Study design and sample size / Sample size per group"
+    severity: medium
+  - id: control_group
+    arrive_section: "Study design and sample size / Controls"
+    severity: medium
+
+  # --- Inclusion/exclusion ---
+  - id: inclusion_criteria
+    arrive_section: "Inclusion and exclusion criteria / Inclusion"
+    severity: medium
+  - id: exclusion_criteria
+    arrive_section: "Inclusion and exclusion criteria / Exclusion"
+    severity: medium
+  - id: data_exclusions
+    arrive_section: "Inclusion and exclusion criteria / Data exclusions"
+    severity: low
+
+  # --- Randomisation & blinding ---
+  - id: randomisation_method
+    arrive_section: "Randomisation and blinding / Randomisation"
+    severity: high
+  - id: allocation_concealment
+    arrive_section: "Randomisation and blinding / Allocation concealment"
+    severity: low
+  - id: blinding_strategy
+    arrive_section: "Randomisation and blinding / Blinding"
+    severity: high
+  - id: confounder_control
+    arrive_section: "Randomisation and blinding / Confounders"
+    severity: low
+
+  # --- Outcome & statistics ---
+  - id: outcome_measures
+    arrive_section: "Outcome and statistics / Outcome measures"
+    severity: high
+  - id: primary_outcome
+    arrive_section: "Outcome and statistics / Primary outcome"
+    severity: high
+  - id: analysis_plan
+    arrive_section: "Outcome and statistics / Analysis plan"
+    severity: medium
+  - id: statistical_methods
+    arrive_section: "Outcome and statistics / Statistical methods"
+    severity: medium
+  - id: results_summary
+    arrive_section: "Outcome and statistics / Results"
+    severity: low
+  - id: effect_size
+    arrive_section: "Outcome and statistics / Effect size"
+    severity: low
+
+  # --- Risk assessment ---
+  - id: personnel_risks
+    arrive_section: "Risk assessment / Personnel risks"
+    severity: medium
+  - id: emergency_procedures
+    arrive_section: "Risk assessment / Emergency procedures"
+    severity: medium
+  - id: waste_disposal
+    arrive_section: "Risk assessment / Waste disposal"
+    severity: low
+
+  # --- Personnel ---
+  - id: personnel_training
+    arrive_section: "Personnel / Training"
+    severity: medium
+  - id: personnel_roles
+    arrive_section: "Personnel / Roles"
+    severity: low

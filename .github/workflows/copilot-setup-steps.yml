@@ -1,0 +1,111 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    # GitHub only allows up to 59 minutes for copilot-setup-steps jobs.
+    timeout-minutes: 59
+    permissions:
+      contents: read
+    env:
+      COREPACK_ENABLE_DOWNLOAD_PROMPT: 0
+      TEST_DATABASE_URL: "postgresql://app:app@localhost:5432/app?serverVersion=16&charset=utf8"
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d app"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v5
+        with:
+          version: 10.28.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: osoma/pnpm-lock.yaml
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+          extensions: ctype, iconv, intl, mbstring, pdo_pgsql, xml, zip
+          tools: composer
+
+      - name: Set up Castor
+        uses: castor-php/setup-castor@v1.0.0
+
+      - name: Install API dependencies
+        working-directory: api
+        env:
+          APP_ENV: test
+        run: composer install --no-interaction --no-progress
+
+      - name: Install Osoma dependencies
+        working-directory: osoma
+        run: pnpm install --frozen-lockfile
+
+      - name: Install E2E dependencies
+        working-directory: e2e
+        run: npm ci
+
+      - name: Configure test DATABASE_URL for cloud-agent
+        # api/.env.test.local is gitignored; it overrides DATABASE_URL so that
+        # PHPUnit running directly on the host resolves 'localhost' instead of
+        # the Docker Compose alias 'database' (which is unreachable here).
+        run: |
+          echo "DATABASE_URL=${{ env.TEST_DATABASE_URL }}" \
+            > api/.env.test.local
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      
+      - name: Prepare PHPUnit test database
+        working-directory: api
+        env:
+          APP_ENV: test
+          DATABASE_URL: ${{ env.TEST_DATABASE_URL }}
+          PGPASSWORD: app
+        run: |
+          echo "DATABASE_URL=$DATABASE_URL"
+          php -v
+          php bin/console about --env=test
+
+          echo "Waiting for PostgreSQL..."
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 -U app -d app && break
+            sleep 2
+          done
+
+          pg_isready -h localhost -p 5432 -U app -d app
+
+          php bin/console doctrine:database:drop --force --if-exists --env=test
+          php bin/console doctrine:database:create --if-not-exists --env=test
+          php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration --all-or-nothing --env=test
+          php bin/console cache:clear --env=test

@@ -1,0 +1,64 @@
+{
+    "_comment": "Golden set of known cross-source equivalences for the AI Compare & Link / Standardize feature. 'items' is the federated search selection fed to the model; 'modelClusters' is a representative structured response; 'expected' is the cross-source clustering we assert the service assembles. With a mocked gateway the ReferenceStandardizationServiceTest validates the deterministic assembly + grounding glue (member resolution, canonical-term parsing). The live, metered evaluation (follow-up #5, app:ai:eval-standardization) runs the real provider against these same 'items' and scores its clusters against 'expected.clusters' with App\\AI\\Eval\\StandardizationEvaluator. Concepts: blood glucose, body weight, grip strength, heart rate, locomotor activity.",
+    "items": [
+        { "id": "jax_phenome:measure:1", "source": "jax_phenome", "sourceName": "JAX Phenome (MPD)", "type": "measure", "title": "Blood glucose", "description": "Blood glucose concentration" },
+        { "id": "impc:measure:2", "source": "impc", "sourceName": "IMPReSS (IMPC)", "type": "measure", "title": "Blood glucose level", "description": "Fasted blood glucose level" },
+        { "id": "nih_cde:cde_element:3", "source": "nih_cde", "sourceName": "NIH CDE Repository", "type": "cde_element", "title": "Glucose, blood", "description": "Glucose measured in blood" },
+        { "id": "jax_phenome:measure:4", "source": "jax_phenome", "sourceName": "JAX Phenome (MPD)", "type": "measure", "title": "Body weight", "description": "Total body weight" },
+        { "id": "impc:measure:5", "source": "impc", "sourceName": "IMPReSS (IMPC)", "type": "measure", "title": "Body weight", "description": "Body weight in grams" },
+        { "id": "impc:measure:6", "source": "impc", "sourceName": "IMPReSS (IMPC)", "type": "measure", "title": "Grip strength", "description": "Forelimb grip strength" },
+        { "id": "nih_cde:cde_element:7", "source": "nih_cde", "sourceName": "NIH CDE Repository", "type": "cde_element", "title": "Grip strength measure", "description": "Grip strength" },
+        { "id": "jax_phenome:measure:8", "source": "jax_phenome", "sourceName": "JAX Phenome (MPD)", "type": "measure", "title": "Heart rate", "description": "Resting heart rate in beats per minute" },
+        { "id": "impc:measure:9", "source": "impc", "sourceName": "IMPReSS (IMPC)", "type": "measure", "title": "Heart rate (HR)", "description": "Heart rate measured by ECG" },
+        { "id": "nih_cde:cde_element:10", "source": "nih_cde", "sourceName": "NIH CDE Repository", "type": "cde_element", "title": "Heart rate, beats per minute", "description": "Cardiac frequency" },
+        { "id": "jax_phenome:measure:11", "source": "jax_phenome", "sourceName": "JAX Phenome (MPD)", "type": "measure", "title": "Locomotor activity", "description": "Total distance travelled in open field" },
+        { "id": "impc:measure:12", "source": "impc", "sourceName": "IMPReSS (IMPC)", "type": "measure", "title": "Locomotor activity (open field)", "description": "Open field horizontal activity count" }
+    ],
+    "modelClusters": [
+        {
+            "clusterId": "glucose",
+            "canonicalTerm": { "iri": "http://purl.obolibrary.org/obo/VT_0000188", "label": "blood glucose level", "ontology": "vt", "confidence": 0.93 },
+            "memberRefIds": ["jax_phenome:measure:1", "impc:measure:2", "nih_cde:cde_element:3"],
+            "evidence": ["All three describe glucose concentration measured in blood."],
+            "proposedRecord": { "title": "Blood glucose level", "type": "measure" }
+        },
+        {
+            "clusterId": "body-weight",
+            "canonicalTerm": { "iri": "http://purl.obolibrary.org/obo/VT_0001259", "label": "body weight", "ontology": "vt", "confidence": 0.97 },
+            "memberRefIds": ["jax_phenome:measure:4", "impc:measure:5"],
+            "evidence": ["Both measure total body weight."],
+            "proposedRecord": { "title": "Body weight", "type": "measure" }
+        },
+        {
+            "clusterId": "grip-strength",
+            "canonicalTerm": { "iri": "http://purl.obolibrary.org/obo/MP_0001515", "label": "abnormal grip strength", "ontology": "mp", "confidence": 0.81 },
+            "memberRefIds": ["impc:measure:6", "nih_cde:cde_element:7"],
+            "evidence": ["Both measure grip strength."],
+            "proposedRecord": { "title": "Grip strength", "type": "measure" }
+        },
+        {
+            "clusterId": "heart-rate",
+            "canonicalTerm": { "iri": "http://purl.obolibrary.org/obo/VT_0000010", "label": "heart rate", "ontology": "vt", "confidence": 0.95 },
+            "memberRefIds": ["jax_phenome:measure:8", "impc:measure:9", "nih_cde:cde_element:10"],
+            "evidence": ["All three measure cardiac frequency / beats per minute."],
+            "proposedRecord": { "title": "Heart rate", "type": "measure" }
+        },
+        {
+            "clusterId": "locomotor-activity",
+            "canonicalTerm": { "iri": "http://purl.obolibrary.org/obo/VT_0001518", "label": "locomotor activity", "ontology": "vt", "confidence": 0.88 },
+            "memberRefIds": ["jax_phenome:measure:11", "impc:measure:12"],
+            "evidence": ["Both measure open-field locomotor activity."],
+            "proposedRecord": { "title": "Locomotor activity", "type": "measure" }
+        }
+    ],
+    "expected": {
+        "clusterCount": 5,
+        "clusters": {
+            "http://purl.obolibrary.org/obo/VT_0000188": ["jax_phenome:measure:1", "impc:measure:2", "nih_cde:cde_element:3"],
+            "http://purl.obolibrary.org/obo/VT_0001259": ["jax_phenome:measure:4", "impc:measure:5"],
+            "http://purl.obolibrary.org/obo/MP_0001515": ["impc:measure:6", "nih_cde:cde_element:7"],
+            "http://purl.obolibrary.org/obo/VT_0000010": ["jax_phenome:measure:8", "impc:measure:9", "nih_cde:cde_element:10"],
+            "http://purl.obolibrary.org/obo/VT_0001518": ["jax_phenome:measure:11", "impc:measure:12"]
+        }
+    }
+}

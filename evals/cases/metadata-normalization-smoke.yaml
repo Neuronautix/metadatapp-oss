@@ -1,0 +1,9 @@
+version: 1
+name: metadata-normalization-smoke
+prompt_version: metadata-normalization.v1
+output_schema: ai.patch-proposal.v1
+dataset: evals/datasets/metadata-normalization-smoke.yaml
+pass_criteria:
+  structured_output_validity: 0.99
+  schema_validation_pass_rate: 1.0
+  provenance_coverage: 1.0

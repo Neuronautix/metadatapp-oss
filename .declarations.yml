@@ -1,0 +1,144 @@
+# Repo declarations configuration
+#
+# This file holds the facts that the declaration generator cannot reliably
+# infer by scanning the repository (people, identifiers, policy choices).
+# `scripts/generate-declarations.py` reads it and renders the machine- and
+# human-readable declaration files (FAIR.md, TRUST.md, AI-declaration.md, ...).
+#
+# Everything here is optional: sensible defaults are derived from the repo
+# (README, LICENSE, NOTICE, git remote) when a value is missing.
+
+project:
+  name: Metadatapp
+  description: >-
+    Open-source FAIR-by-design metadata management platform for biomedical and
+    preclinical research, combining a Symfony/API Platform backend, the Osoma
+    React frontend, and server-side integrations with external laboratory systems.
+  homepage: https://www.metadatapp.net
+  repository: https://github.com/Neuronautix/metadatapp
+  organization: Neuronautix
+  contact: damien@metadatapp.net
+  license: AGPL-3.0-or-later
+  keywords:
+    - FAIR
+    - research-data-management
+    - metadata
+    - RO-Crate
+    - JSON-LD
+    - biomedical
+    - ontology
+
+authors:
+  - name: Damien Huzard
+    affiliation: Neuronautix
+    role: maintainer
+
+# AI usage facts that cannot be derived from code alone. These feed
+# AI-declaration.md and TRUST.md so the disclosures stay honest.
+ai:
+  # How AI is used in the *product* (features shipped to users).
+  product_use:
+    - "Assistive metadata curation and normalization suggestions (human-reviewed)."
+    - "Read-only MCP server exposing research metadata to AI assistants."
+  # How AI is used to *develop* this repository.
+  development_use:
+    - "AI coding agents (Claude Code and compatible agents) contribute changes under human review."
+  # Guardrails that are actually enforced.
+  guardrails:
+    - "All AI write-back to research records is human-reviewed before persistence."
+    - "MCP metadata access is read-only (see doc/wiki/decisions/ai-mcp-read-only.md)."
+    - "Curation governance is policy-gated (policies/ai/curation-governance-policy.yaml)."
+  human_oversight: required
+  training_on_user_data: false
+
+# Repository-specific FAIR/TRUST capabilities, merged onto the generator's
+# generic core (see merge_capabilities in scripts/generate-declarations.py).
+# Entries with an existing core `id` extend that capability's signals; new ids
+# are added. A capability is only ever shown when at least one signal exists.
+capabilities:
+  fair:
+    findable:
+      - id: ro-crate-descriptor
+        label: RO-Crate metadata descriptor
+        rationale: packaged, self-describing metadata
+        signals: [templates/ro-crate-metadata.jsonld.tpl]
+      - id: metadata-harvest
+        label: Metadata harvesting
+        rationale: programmatic discovery of entities
+        signals: [scripts/fetch-mapp-entities.py]
+    accessible:
+      - id: documented-access            # extends the core README capability
+        signals: [doc/wiki/features/fair-checking.md]
+    interoperable:
+      - id: ro-crate                      # extends the core RO-Crate capability
+        signals: [scripts/assemble-ro-crate.py, templates/ro-crate-metadata.jsonld.tpl]
+      - id: shared-vocab
+        label: Shared metadata vocabularies
+        rationale: agreed schemas/ontologies
+        signals: [doc/wiki/features/metadata-standards.md]
+    reusable:
+      - id: provenance
+        label: Curation & provenance
+        rationale: documented data lineage
+        signals: [doc/wiki/features/curation.md]
+  trust:
+    transparency:
+      - id: documented-pipeline
+        label: Documented AI pipeline
+        rationale: the flow is written down
+        signals: [docs/architecture/ai-pipeline.md]
+    responsibility:
+      - id: governance-policy             # extends the core policies/ capability
+        signals: [policies/ai/curation-governance-policy.yaml]
+      - id: readonly-boundary
+        label: Read-only access boundary
+        rationale: no unreviewed write-back
+        signals: [doc/wiki/decisions/ai-mcp-read-only.md]
+    user_focus:
+      - id: assistant-access
+        label: Assistant access surface
+        rationale: documented AI access for users
+        signals: [doc/wiki/features/ai-mcp.md]
+      - id: curation-feature
+        label: Curation feature
+        rationale: maps to a real user need
+        signals: [doc/wiki/features/curation.md]
+    technology:
+      - id: ai-config
+        label: Declared AI configuration
+        rationale: reproducible serving config
+        signals: [api/config/packages/ai.yaml]
+
+# Optional human notes attached to *detected* capabilities in FAIR/TRUST, keyed
+# by capability id (see FAIR_CAPABILITIES / TRUST_CAPABILITIES in the generator).
+# Notes never create a claim — a capability is only ever shown when its evidence
+# exists. They only annotate something already detected.
+capability_notes: {}
+#   ro-crate: "Crates are assembled in CI for every published dataset."
+
+# Machine-only software metadata files. Both default to true.
+metadata:
+  citation_cff: true   # emit CITATION.cff (Citation File Format)
+  codemeta: true       # emit codemeta.json (CodeMeta 2.0 JSON-LD)
+
+# Per-declaration overrides. `managed: false` means the generator will not
+# overwrite the file body — it only validates presence and indexes metadata.
+declarations:
+  ai-declaration:
+    signals: [policies/ai, api/config/packages/ai.yaml, docs/architecture/ai-foundation.md]
+  fair:
+    signals:
+      - scripts/assemble-ro-crate.py
+      - templates/ro-crate-metadata.jsonld.tpl
+      - doc/wiki/features/fair-checking.md
+      - doc/wiki/features/metadata-standards.md
+  trust:
+    signals:
+      - doc/wiki/features/ai-mcp.md
+      - doc/wiki/decisions/ai-mcp-read-only.md
+      - api/config/packages/ai.yaml
+  design:
+    # design.md is hand-authored design tokens; treat it as a managed-by-humans
+    # declaration that the generator only discovers and indexes.
+    managed: false
+    signals: [osoma]

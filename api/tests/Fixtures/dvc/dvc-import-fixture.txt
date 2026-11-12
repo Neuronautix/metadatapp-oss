@@ -1,0 +1,4 @@
+recorded_at,cage_external_id,metric_external_id,metric_name,data_type,value,unit
+2026-03-03T06:00:00Z,DVC-CAGE-IMPORT-1,DVC_METRIC_ACTIVITY,DVC activity count,Activity,42,count/6h
+2026-03-03T12:00:00Z,DVC-CAGE-IMPORT-1,DVC_METRIC_FOOD,DVC food intake,Food Intake,1.25,g
+2026-03-03T18:00:00Z,DVC-CAGE-NOT-FOUND,DVC_METRIC_ACTIVITY,DVC activity count,Activity,55,count/6h

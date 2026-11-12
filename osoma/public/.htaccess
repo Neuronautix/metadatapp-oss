@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Serve existing assets and directories directly.
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+RewriteRule ^ - [L]
+
+# Let React Router handle application routes.
+RewriteRule ^ /index.html

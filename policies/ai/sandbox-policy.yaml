@@ -1,0 +1,13 @@
+version: 1
+name: sandbox-policy
+sandbox:
+  default_enabled: false
+  allowed_when:
+    - code_execution_required
+    - autonomous_tool_use_required
+    - batch_eval_job
+  requirements:
+    - isolated_runtime
+    - approved_task_type
+    - trace_logging
+    - explicit_operator_enablement

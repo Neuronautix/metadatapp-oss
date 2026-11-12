@@ -1,0 +1,436 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    softmouse_password: '%env(SOFTMOUSE_PASSWORD)%'
+    softmouse_username: '%env(SOFTMOUSE_USERNAME)%'
+    llm_curation_provider_default: 'mock'
+    llm_curation_mock_mode_default: 'normal'
+    llm_curation_provider: '%env(default:llm_curation_provider_default:LLM_CURATION_PROVIDER)%'
+    llm_curation_mock_mode: '%env(default:llm_curation_mock_mode_default:LLM_CURATION_MOCK_MODE)%'
+    sensor_agent_base_url_default: ''
+    sensor_agent_token_default: ''
+    sensor_agent_timeout_default: '5'
+    sensor_agent_enabled_default: 'false'
+    sensor_agent_base_url: '%env(default:sensor_agent_base_url_default:SENSOR_AGENT_BASE_URL)%'
+    sensor_agent_token: '%env(default:sensor_agent_token_default:SENSOR_AGENT_TOKEN)%'
+    sensor_agent_timeout: '%env(float:default:sensor_agent_timeout_default:SENSOR_AGENT_TIMEOUT)%'
+    sensor_agent_enabled: '%env(bool:default:sensor_agent_enabled_default:SENSOR_AGENT_ENABLED)%'
+    nih_cde_api_base_default: 'https://cde.nlm.nih.gov/api'
+    nih_cde_api_base: '%env(default:nih_cde_api_base_default:NIH_CDE_API_BASE)%'
+    # Safe-by-default for public/OSS deployments: when the env var is unset, hide the
+    # connected-app proxy endpoints from the public OpenAPI docs (/api/docs).
+    openapi_hide_connected_apps_default: 'true'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/OpenApi/'
+
+    App\OpenApi\DvcOpenApiFactory:
+        arguments:
+            $decorated: '@App\OpenApi\DvcOpenApiFactory.inner'
+            $projectDir: '%kernel.project_dir%'
+            $hideConnectedAppsFromDocs: '%env(bool:default:openapi_hide_connected_apps_default:OPENAPI_HIDE_CONNECTED_APPS)%'
+        autoconfigure: false
+        decorates: 'api_platform.openapi.factory'
+        decoration_priority: 10
+
+    App\Guideline\TemplateLoader:
+        arguments:
+            $guidelinesDir: '%kernel.project_dir%/config/guidelines'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    App\ConnectedApps\Apps\Elabftw\Client\ElabftwHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\Elabftw\Client\ElabftwHttpClient'
+
+    App\ConnectedApps\Apps\Elabftw\Client\ElabftwHttpClient:
+        arguments:
+            $httpClient: '@elabftw.client'
+
+    App\CurateGpt\Client\CurateGptClientInterface:
+        alias: 'App\CurateGpt\Client\CurateGptHttpClient'
+
+    App\CurateGpt\Client\CurateGptHttpClient:
+        arguments:
+            $curateGptClient: '@curate_gpt.client'
+
+    App\ConnectedApps\Apps\SoftMouse\Client\Authentication:
+        $softMousePassword: '%softmouse_password%'
+        $softMouseUsername: '%softmouse_username%'
+
+    App\ConnectedApps\Apps\SoftMouse\Client\SoftMouseHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\SoftMouse\Client\SoftMouseHttpClient'
+
+    App\ConnectedApps\Apps\SoftMouse\Client\SoftMouseHttpClient:
+        arguments:
+            $softMouseClient: '@soft_mouse.client'
+
+    App\ConnectedApps\Apps\SoftMouse\Client\ClientInterface:
+        alias: 'App\ConnectedApps\Apps\SoftMouse\Client\Client'
+
+    App\ConnectedApps\Apps\SoftMouse\SoftMouseService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\Fair3r\Client\Fair3rHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\Fair3r\Client\Fair3rHttpClient'
+
+    App\ConnectedApps\Apps\Fair3r\Client\Fair3rHttpClient:
+        arguments:
+            $fair3rClient: '@fair3r.client'
+
+    App\ConnectedApps\Apps\Fair3r\Client\ClientInterface:
+        alias: 'App\ConnectedApps\Apps\Fair3r\Client\Client'
+
+    App\ConnectedApps\Apps\Fair3r\Fair3rService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\Elabftw\ElabftwService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\Osf\OsfService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\PreclinicalTrials\PreclinicalTrialsService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\Apps\PreclinicalTrials\PreclinicalTrialsServiceInterface:
+        alias: 'App\ConnectedApps\Apps\PreclinicalTrials\PreclinicalTrialsService'
+
+    App\ConnectedApps\Apps\PreclinicalTrials\Client\PreclinicalTrialsClientInterface:
+        alias: 'App\ConnectedApps\Apps\PreclinicalTrials\Client\PreclinicalTrialsClient'
+
+    App\ConnectedApps\Apps\NihCde\Client\NihCdeClientInterface:
+        alias: 'App\ConnectedApps\Apps\NihCde\Client\NihCdeClient'
+
+    App\ConnectedApps\Apps\Cedar\Client\CedarClientInterface:
+        alias: 'App\ConnectedApps\Apps\Cedar\Client\CedarClient'
+
+    App\ConnectedApps\Apps\Osf\Client\OsfClientInterface:
+        alias: 'App\ConnectedApps\Apps\Osf\Client\OsfClient'
+
+    App\ConnectedApps\Apps\Mnms\Client\MnmsClientInterface:
+        alias: 'App\ConnectedApps\Apps\Mnms\Client\MnmsClient'
+
+    App\ConnectedApps\Apps\BioPortal\Client\BioPortalClientInterface:
+        alias: 'App\ConnectedApps\Apps\BioPortal\Client\BioPortalClient'
+
+    App\ConnectedApps\Apps\Cedar\Client\CedarClient:
+        arguments:
+            $cache: '@cache.app'
+
+    App\ConnectedApps\Apps\JaxPhenome\Client\JaxPhenomeClientInterface:
+        alias: 'App\ConnectedApps\Apps\JaxPhenome\Client\JaxPhenomeClient'
+
+    App\ConnectedApps\Apps\JaxPhenome\Client\JaxPhenomeClient:
+        arguments:
+            $httpClient: '@jax_phenome.client'
+            $cache: '@cache.app'
+
+    App\ConnectedApps\Apps\Impc\Client\ImpcClientInterface:
+        alias: 'App\ConnectedApps\Apps\Impc\Client\ImpcClient'
+
+    App\ConnectedApps\Apps\Impc\Client\ImpcClient:
+        arguments:
+            $httpClient: '@impc.client'
+            $cache: '@cache.app'
+
+    App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClientInterface:
+        alias: 'App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClient'
+
+    App\ConnectedApps\Apps\Tecniplast\Import\DvcImportServiceInterface:
+        alias: 'App\ConnectedApps\Apps\Tecniplast\Import\DvcImportService'
+
+    App\ConnectedApps\Apps\Tecniplast\TecniplastService:
+        tags: [ 'app.connected_app_service' ]
+
+    App\ConnectedApps\ConnectedAppServiceFactory:
+        arguments:
+            $connectedAppRepository: !tagged_iterator app.connected_app_service
+
+    App\Service\SensorAgentClient:
+        arguments:
+            $baseUrl: '%sensor_agent_base_url%'
+            $token: '%sensor_agent_token%'
+            $timeout: '%sensor_agent_timeout%'
+            $enabled: '%sensor_agent_enabled%'
+
+    App\Service\SensorAgentClientInterface:
+        alias: 'App\Service\SensorAgentClient'
+
+    App\Export\Nwb\NwbExportService:
+        arguments:
+            $nwbToolsDir: '%kernel.project_dir%/tools/nwb'
+
+    App\Import\Nwb\NwbImportService:
+        arguments:
+            $nwbToolsDir: '%kernel.project_dir%/tools/nwb'
+
+    App\ConnectedApps\Http\ConnectedAppRateLimiter:
+        arguments:
+            $cache: '@cache.app'
+
+    App\Demo\Sensors\SensorDemoService:
+        arguments:
+            $cache: '@cache.app'
+
+    App\Curation\Provider\MockLLMCurationProvider:
+        arguments:
+            $mode: '%llm_curation_mock_mode%'
+        tags:
+            - { name: 'app.llm_curation_provider', alias: 'mock' }
+
+    App\Curation\Provider\CurateGptOntologyProvider:
+        tags:
+            - { name: 'app.llm_curation_provider', alias: 'curate_gpt' }
+
+    App\Curation\LLMCurationProviderRegistry:
+        arguments:
+            $providers: !tagged_iterator { tag: 'app.llm_curation_provider', index_by: 'alias' }
+            $defaultProvider: '%llm_curation_provider%'
+
+    # --- Reference Hub semantic discovery (query expansion + embeddings) ---
+    # The embedding abstraction defaults to the pure, deterministic hashing impl so
+    # similarity works with AI off and tests need no pgvector. Re-point this alias to
+    # App\ConnectedApps\Reference\Semantic\GatewayEmbeddingProvider to enable a real
+    # embeddings provider (itself still flag-guarded).
+    App\ConnectedApps\Reference\Semantic\EmbeddingProviderInterface:
+        alias: 'App\ConnectedApps\Reference\Semantic\HashingEmbeddingProvider'
+
+    App\ConnectedApps\Reference\Semantic\GatewayEmbeddingProvider:
+        arguments:
+            $realEmbeddingsEnabled: '%ai.real_embeddings_enabled%'
+
+    App\ConnectedApps\Reference\ReferenceSearchService:
+        arguments:
+            $semanticSearchEnabled: '%ai.reference_semantic_enabled%'
+
+    App\AI\Governance\AiFeatureFlags:
+        arguments:
+            $assistantEnabled: '%ai.assistant_enabled%'
+            $provider: '%ai.provider%'
+            $defaultModel: '%ai.default_model%'
+            $enabledTasks: '%ai.enabled_tasks%'
+            $sandboxEnabled: '%ai.sandbox_enabled%'
+            $humanApprovalRequired: '%ai.human_approval_required%'
+            $writeActionsEnabled: '%ai.write_actions_enabled%'
+            $agenticModeEnabled: '%ai.agentic_mode_enabled%'
+
+    App\AI\Gateway\NullModelGateway:
+        arguments:
+            $modelName: '%ai.default_model%'
+        tags:
+            - { name: 'app.model_gateway', alias: 'null' }
+
+    App\AI\Gateway\MockModelGateway:
+        arguments:
+            $modelName: '%ai.default_model%'
+        tags:
+            - { name: 'app.model_gateway', alias: 'mock' }
+
+    App\AI\Gateway\CurateGptModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'curate_gpt' }
+
+    App\AI\Gateway\AccountAwareModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'account' }
+
+    App\AI\Credentials\SecretCipher:
+        arguments:
+            $appSecret: '%env(APP_SECRET)%'
+
+    # Default secret-store binding. Override this alias in deployment-specific
+    # config (e.g. config/services_prod.yaml) to plug in a managed secret
+    # backend such as Vault, AWS Secrets Manager, or GCP Secret Manager.
+    App\Secrets\SecretStoreInterface: '@App\AI\Credentials\SecretCipher'
+
+    App\AI\Credentials\LlmProviderCredentialService:
+        arguments:
+            $openAiApiKey: '%ai.openai_api_key%'
+            $openAiModel: '%ai.openai_model%'
+            $anthropicApiKey: '%ai.anthropic_api_key%'
+            $anthropicModel: '%ai.anthropic_model%'
+
+    App\AI\Gateway\OpenAiModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'openai' }
+
+    App\AI\Gateway\AnthropicModelGateway:
+        tags:
+            - { name: 'app.model_gateway', alias: 'anthropic' }
+
+    App\AI\Gateway\ModelGatewayRegistry:
+        arguments:
+            $gateways: !tagged_iterator { tag: 'app.model_gateway', index_by: 'alias' }
+            $defaultGateway: '%ai.provider%'
+
+    App\AI\Mcp\McpBridgeService:
+        arguments:
+            $enabled: '%ai.mcp_bridge_enabled%'
+            $approvedTools:
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['get_live_sensor_health', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['get_live_sensor_observation', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['get_live_sensor_threshold_status', true, false, false]
+
+    App\Mcp\Http\McpController:
+        decorates: 'mcp.server.controller'
+        arguments:
+            $server: '@mcp.server'
+            $httpMessageFactory: '@mcp.psr_http_factory'
+            $httpFoundationFactory: '@mcp.http_foundation_factory'
+            $responseFactory: '@mcp.psr17_factory'
+            $streamFactory: '@mcp.psr17_factory'
+            $logger: '@logger'
+        public: true
+        tags:
+            - { name: 'controller.service_arguments' }
+            - { name: 'monolog.logger', channel: 'mcp' }
+
+    App\Mcp\JsonSchema\ParameterSchemaFactory:
+        decorates: 'api_platform.mcp.json_schema.schema_factory'
+        arguments:
+            $decorated: '@App\Mcp\JsonSchema\ParameterSchemaFactory.inner'
+
+    # --- ELN-CDE Crosswalk (Template Crosswalk Studio) ---
+    App\Crosswalk\Cde\LocalMetadatappCdeProvider:
+        tags: [ 'app.cde_provider' ]
+
+    App\Crosswalk\Cde\NihCdeProvider:
+        arguments:
+            $baseUrl: '%nih_cde_api_base%'
+        tags: [ 'app.cde_provider' ]
+
+    App\Crosswalk\Cde\CustomJsonCdeProvider:
+        tags: [ 'app.cde_provider' ]
+
+    App\Crosswalk\Cde\CdeProviderRegistry:
+        arguments:
+            $providers: !tagged_iterator app.cde_provider
+
+    # AI re-ranks the deterministic mapping candidates when an AI provider is
+    # configured; it falls back to the deterministic order when AI is off, so this
+    # is a safe default. Re-point to NullMappingSuggestionRefiner to disable entirely.
+    App\Crosswalk\Mapping\MappingSuggestionRefinerInterface:
+        alias: 'App\Crosswalk\Mapping\LlmMappingSuggestionRefiner'
+
+    # Tool dispatcher for the agentic loop. Composes the Reference Hub read/write
+    # tools with the read-only guideline-evidence tool; the composite routes each
+    # call to the dispatcher that owns the named tool.
+    App\AI\Runtime\ToolDispatcherInterface:
+        alias: 'App\AI\Runtime\CompositeToolDispatcher'
+
+    # Bounded multi-step tool-use orchestrator. Tool registry mirrors the MCP
+    # access policy: read tools need no approval; import_reference is a write tool
+    # that requires human approval (and is only dispatched when write-back is on).
+    App\AI\Runtime\ToolUseOrchestrator:
+        arguments:
+            $toolRegistry:
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['search_reference_resources', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['list_my_references', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['standardize_references', true, false, false]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['import_reference', false, true, true]
+                - !service
+                    class: App\AI\Mcp\ToolAccessPolicy
+                    arguments: ['read_guideline_evidence', true, false, false]
+            $maxIterations: 5
+
+    # Dedicated standardizer for the eval harness with a lifted item cap, so the
+    # eval scores the whole golden set rather than only the first MAX_ITEMS.
+    ai.eval.reference_standardizer:
+        class: App\ConnectedApps\Reference\Standardization\ReferenceStandardizationService
+        autowire: true
+        arguments:
+            $maxItems: 64
+
+    # Live, metered eval harness for the AI Standardize References feature
+    # (follow-up #5). Off by default at runtime: the command itself refuses to run
+    # unless the assistant is enabled and a --max-tokens budget cap is supplied.
+    App\Command\EvaluateStandardizationCommand:
+        arguments:
+            $projectDir: '%kernel.project_dir%'
+            $standardizer: '@ai.eval.reference_standardizer'
+
+when@dev:
+    services:
+        App\ConnectedApps\Apps\SoftMouse\Client\Mock\HttpClientMock:
+            decorates: 'soft_mouse.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\SoftMouse\Client\Mock\HttpClientMock.softmouse.client'
+            arguments: ['@.inner']
+        App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock:
+            decorates: 'elabftw.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock.elabftw.client'
+        # JAX Phenome, IMPC and CEDAR intentionally use their REAL public APIs in
+        # dev so the connected-app browsers fetch live data. Their mocks remain
+        # active under when@test (below) so the functional suite stays hermetic.
+#        App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock:
+#            decorates: 'App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClient'
+#            decoration_inner_name: 'App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock.tecniplast.client'
+#            arguments: ['@.inner']
+
+
+when@test:
+    services:
+#    public: true
+#        App\Tests\Api\Security\:
+#            resource: '../tests/Api/Security/'
+#            autowire: true
+#            autoconfigure: true
+#            public: true
+    # ...
+#        App\ConnectedApps\Apps\Fair3r\Command\SyncCommandProcessor:
+#            alias: Fair3rCommandProcessor.test
+#            public: true
+
+        App\ConnectedApps\Apps\SoftMouse\Client\Mock\HttpClientMock:
+            decorates: 'soft_mouse.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\SoftMouse\Client\Mock\HttpClientMock.softmouse.client'
+            arguments: ['@.inner']
+        App\ConnectedApps\Apps\Fair3r\Client\Mock\HttpClientMock:
+            decorates: 'fair3r.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Fair3r\Client\Mock\HttpClientMock.fair3r.client'
+            arguments: ['@.inner']
+        App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock:
+            decorates: 'App\ConnectedApps\Apps\Tecniplast\Client\TecniplastHttpClient'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Tecniplast\Client\Mock\HttpClientMock.tecniplast.client'
+            arguments: ['@.inner']
+        App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock:
+            decorates: 'elabftw.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Elabftw\Client\Mock\ElabftwHttpClientMock.elabftw.client'
+        App\ConnectedApps\Apps\Cedar\Client\CedarClientInterface:
+            alias: 'App\ConnectedApps\Apps\Cedar\Client\Mock\CedarClientMock'
+        App\ConnectedApps\Apps\JaxPhenome\Client\Mock\HttpClientMock:
+            decorates: 'jax_phenome.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\JaxPhenome\Client\Mock\HttpClientMock.jax_phenome.client'
+        App\ConnectedApps\Apps\Impc\Client\Mock\HttpClientMock:
+            decorates: 'impc.client'
+            decoration_inner_name: 'App\ConnectedApps\Apps\Impc\Client\Mock\HttpClientMock.impc.client'

@@ -1,0 +1,5 @@
+api_platform:
+  eager_loading:
+    enabled: false
+    max_joins: 1000
+    force_eager: false

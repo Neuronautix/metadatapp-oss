@@ -1,0 +1,22 @@
+# Metadatapp
+
+> Open-source FAIR-by-design metadata management platform for biomedical and preclinical research, combining a Symfony/API Platform backend, the Osoma React frontend, and server-side integrations with external laboratory systems.
+
+This file helps LLMs and AI agents discover the repository's machine- and
+human-readable declarations.
+
+## Declarations
+
+- [AI Declaration](./AI-declaration.md): repository uses AI (agents, prompts, models, or MCP)
+- [FAIR Declaration](./FAIR.md): repository manages or describes research data
+- [TRUST Declaration](./TRUST.md): repository performs AI knowledge management (MCP/RAG, prompt/eval corpora, governed knowledge base)
+- [Design Declaration](./design.md): repository ships a frontend / design system
+
+## Machine metadata
+
+- [Citation metadata](./CITATION.cff): repository is citable software
+- [CodeMeta software metadata](./codemeta.json): repository is software with FAIR metadata
+
+## Index
+
+- [Machine-readable index](./.well-known/repo-declarations.json)
